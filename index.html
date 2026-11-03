@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Risk exams</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&display=swap&subset=cyrillic,greek" rel="stylesheet">
+<style>
+:root{--paper:#F4F6F8;--surface:#FFFFFF;--ink:#15202B;--muted:#5B6775;--line:#DCE2E8;--line2:#ECEFF3;--navy:#1F3A5F;--navy-ink:#FFFFFF;--navy-soft:#E6EDF5;
+--ok:#1E7A45;--ok-bg:#E3F2E9;--bad:#B4372C;--bad-bg:#FBE8E6;--amber:#8A5A00;--amber-bg:#FBEFD7;color-scheme:light;
+--f:'Commissioner',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--paper:#0F141A;--surface:#161C24;--ink:#E4E9EF;--muted:#98A3B1;--line:#29323D;--line2:#1E252E;--navy:#9BBCE6;--navy-ink:#0F141A;--navy-soft:#1C2939;
+--ok:#7FD3A0;--ok-bg:#173726;--bad:#F19A90;--bad-bg:#3D1E1B;--amber:#F2C56B;--amber-bg:#3A2D12;color-scheme:dark}}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%}body{margin:0;min-height:100%;background:var(--paper);color:var(--ink);font:400 16px/1.55 var(--f);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+a{color:var(--navy)}
+:focus-visible{outline:2px solid var(--navy);outline-offset:2px;border-radius:6px}
+h1{font-size:clamp(26px,4vw,34px);line-height:1.15;font-weight:600;letter-spacing:-.015em;margin:0 0 8px}
+h2{font-size:18px;font-weight:600;margin:0 0 12px}
+.muted{color:var(--muted)}.small{font-size:13px}.pad{padding:24px 0}.err{color:var(--bad)}
+.btn{display:inline-flex;align-items:center;gap:6px;font:500 15px/1 var(--f);padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}.btn:disabled{opacity:.5;cursor:default}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:var(--navy-ink)}.btn.primary:hover{filter:brightness(1.08)}
+.btn.big{font-size:17px;padding:14px 22px;border-radius:12px}.btn.sm{font-size:13px;padding:6px 10px;border-radius:8px}
+.btn.danger{color:var(--bad)}.btn.danger:hover{border-color:var(--bad)}
+.icon{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;font-size:15px;line-height:1}
+.icon:disabled{opacity:.35;cursor:default}.icon.danger{color:var(--bad)}
+input,textarea,select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:9px 11px;width:100%}
+textarea{resize:vertical;line-height:1.5}input:focus,textarea:focus,select:focus{outline:2px solid var(--navy);outline-offset:-1px;border-color:transparent}
+input[type=checkbox],input[type=radio]{width:18px;height:18px;padding:0;accent-color:var(--navy);flex:none;margin:0}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:13px}
+
+/* shell */
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--paper)}
+.top .in{max-width:1080px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;margin-right:8px}.brand img{width:28px;height:28px;border-radius:50%}
+.nav{display:flex;gap:4px;flex:1}.nav a{padding:7px 12px;border-radius:9px;text-decoration:none;color:var(--muted);font-weight:500;font-size:15px}
+.nav a:hover{color:var(--ink)}.nav a[aria-current=page]{background:var(--navy-soft);color:var(--navy)}
+.who{display:flex;align-items:center;gap:8px;position:relative;font-size:14px;color:var(--muted)}
+.langmenu{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:0 12px 30px rgba(15,25,40,.16);z-index:30;min-width:170px}
+.langmenu button{display:flex;gap:10px;width:100%;padding:8px 10px;border:0;background:none;font:inherit;color:var(--ink);border-radius:8px;cursor:pointer;text-align:left}
+.langmenu button:hover,.langmenu button[aria-checked=true]{background:var(--navy-soft)}.langmenu b{width:22px}
+main{max-width:1080px;margin:0 auto;padding:28px 20px 120px}
+.narrow{max-width:760px}
+
+/* gate */
+.gate{min-height:100vh;display:grid;place-items:center;padding:24px}
+.gate .box{max-width:400px;text-align:left}.gate img{width:44px;height:44px;border-radius:50%;margin-bottom:18px}.gate p{color:var(--muted);margin:0 0 22px}
+
+/* home */
+.hero{padding:28px 0 32px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.kicker{color:var(--navy);font-weight:600;font-size:15px;margin:0 0 6px}
+.lede{color:var(--muted);max-width:62ch;margin:0 0 14px;font-size:17px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 0;color:var(--muted);font-size:14px;margin:0 0 22px}
+.meta span+span::before{content:"";display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--muted);opacity:.5;vertical-align:middle;margin:0 12px}
+.sec{font-size:15px;color:var(--muted);font-weight:600;margin:28px 0 8px}
+.rows{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.rows li{border-bottom:1px solid var(--line)}
+.rows a,.rowdiv{display:grid;grid-template-columns:1fr auto;gap:2px 16px;padding:14px 4px;text-decoration:none;color:var(--ink)}
+.rows a:hover b{color:var(--navy)}.rows .meta{margin:0;grid-column:1}.rows .tag{grid-row:1/3;grid-column:2;align-self:center}
+.empty{padding:48px 0;max-width:52ch}.empty p{color:var(--muted)}.empty.soft{padding:24px 0}
+.tag{display:inline-block;font-size:13px;font-weight:500;padding:3px 10px;border-radius:999px;background:var(--line2);color:var(--muted);white-space:nowrap}
+.tag.ok{background:var(--ok-bg);color:var(--ok)}.tag.bad{background:var(--bad-bg);color:var(--bad)}.tag.amber{background:var(--amber-bg);color:var(--amber)}
+.tag.st-open{background:var(--navy-soft);color:var(--navy)}
+
+/* questions */
+.takehead{margin-bottom:12px}.back{display:inline-block;color:var(--muted);text-decoration:none;font-size:14px;margin-bottom:14px}.back:hover{color:var(--ink)}
+.note{background:var(--amber-bg);color:var(--amber);padding:10px 14px;border-radius:10px;font-size:14px;margin:0 0 16px}.note.okn{background:var(--ok-bg);color:var(--ok)}
+.qlist{list-style:none;margin:0;padding:0}
+.qlist>.q{position:relative;padding:24px 0 26px 64px;border-bottom:1px solid var(--line)}
+.qhead{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.qlist:not(.edit) .qn{position:absolute;left:0;top:20px;width:44px;height:44px;border-radius:50%;border:1.5px solid var(--navy);color:var(--navy);display:grid;place-items:center;font-weight:600;font-size:17px;font-variant-numeric:tabular-nums}
+.qpts{font-size:13px;color:var(--muted)}
+.qtext{font-size:17px;font-weight:500;margin:0 0 4px;max-width:66ch}
+.qhint{font-size:13px;color:var(--muted);margin:0 0 14px}
+.opts{display:grid;gap:8px;max-width:620px}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--surface);cursor:pointer}
+.opt:hover{border-color:var(--muted)}.opt:has(input:checked){border-color:var(--navy);background:var(--navy-soft)}.opt input{margin-top:2px}
+.ta{max-width:620px;min-height:120px}
+.submitbar{position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--surface);border-top:1px solid var(--line);padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;align-items:center;gap:16px;font-size:14px;color:var(--muted)}
+.clock{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink);padding:5px 10px;border-radius:8px;background:var(--line2)}.clock.low{background:var(--bad-bg);color:var(--bad)}
+
+/* results */
+.verdict{display:flex;gap:28px;align-items:center;padding:20px 0 28px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.big2{font-size:22px;font-weight:600;margin:0}
+.stamp{--c:var(--navy);flex:none;width:132px;height:132px;border-radius:50%;border:3px solid var(--c);box-shadow:inset 0 0 0 5px var(--surface),inset 0 0 0 7px var(--c);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--c);transform:rotate(-8deg);background:var(--surface)}
+.stamp b{font-size:34px;line-height:1;font-weight:700;letter-spacing:-.02em}.stamp span{font-size:13px;font-weight:600;margin-top:4px;text-align:center;padding:0 10px;line-height:1.2}
+.stamp.pass{--c:var(--ok)}.stamp.fail{--c:var(--bad)}.stamp.pend{--c:var(--amber)}
+.mhead .stamp{width:92px;height:92px}.mhead .stamp b{font-size:24px}.mhead .stamp span{font-size:11px}
+@media (prefers-reduced-motion:no-preference){.verdict .stamp{animation:stamp .5s cubic-bezier(.2,1.6,.4,1) both}@keyframes stamp{from{transform:rotate(-8deg) scale(1.6);opacity:0}}}
+.review .q.st-right .qn{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}.review .q.st-wrong .qn,.review .q.st-empty .qn{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.review .q.st-part .qn,.review .q.st-pending .qn{background:var(--amber-bg);border-color:var(--amber);color:var(--amber)}
+.ropts{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px;max-width:620px}
+.ropts li{display:flex;gap:10px;align-items:baseline;padding:9px 12px;border-radius:10px;border:1px solid var(--line)}
+.ropts .mark{width:16px;flex:none;font-weight:700}.ropts em{margin-left:auto;font-style:normal;font-size:12.5px;color:var(--muted);white-space:nowrap;padding-left:10px}
+.ropts li.is-c{border-color:var(--ok);background:var(--ok-bg)}.ropts li.is-c .mark{color:var(--ok)}.ropts li.is-w{border-color:var(--bad);background:var(--bad-bg)}.ropts li.is-w .mark{color:var(--bad)}
+.lbl{font-size:13px;color:var(--muted);font-weight:500;margin:14px 0 4px}
+.answer{background:var(--line2);border-radius:10px;padding:10px 14px;max-width:620px;white-space:normal}.answer.model{background:var(--navy-soft)}.answer.note2{background:var(--amber-bg)}
+.grade{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-top:12px;max-width:620px}.grade label{display:grid;gap:4px;font-size:13px;color:var(--muted)}.grade input[type=number]{width:80px}.grade .pin{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:15px}.grade .grow{flex:1;min-width:200px}
+
+/* admin */
+.pagehead{display:flex;align-items:flex-end;gap:12px 16px;flex-wrap:wrap;margin-bottom:20px}.pagehead .back{flex-basis:100%;margin:0}.pagehead h1{flex:1;margin:0;min-width:200px}
+.acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.acts.end{justify-content:flex-end;margin-top:16px}
+.tblwrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.tbl{width:100%;border-collapse:collapse;font-size:15px}.tbl th{text-align:left;font-size:13px;font-weight:500;color:var(--muted);padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:12px 14px;border-bottom:1px solid var(--line2);vertical-align:middle}.tbl tr:last-child td{border-bottom:0}.tbl .num{text-align:right;font-variant-numeric:tabular-nums}
+.tbl td.acts{display:table-cell;text-align:right;white-space:nowrap}.tbl td.acts>*{margin-left:6px}.tbl a{text-decoration:none}.tbl select{width:auto;padding:6px 8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:14px}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}.form h2,.form .full{grid-column:1/-1}
+.form label,.q.card>label{display:grid;gap:5px;font-size:13.5px;color:var(--muted);font-weight:500}
+.form label.check,.cbox{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:14.5px}
+.qlist.edit>.q.card{padding:16px 18px;border:1px solid var(--line);margin-bottom:12px;display:grid;gap:12px}
+.qlist.edit .qhead{margin:0;flex-wrap:wrap}.qlist.edit .qn{width:30px;height:30px;border-radius:50%;background:var(--navy);color:var(--navy-ink);display:grid;place-items:center;font-weight:600;font-size:14px}
+.qlist.edit select{width:auto}.ptsin{display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted)}.ptsin input{width:72px}.grow{flex:1}
+.eopts{display:grid;gap:8px}.eopt{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+.cbox{min-width:92px}.cbox span{font-size:13px;color:var(--muted)}.eopts>.btn{justify-self:start}.cbox:has(input:checked) span{color:var(--ok);font-weight:600}
+.addq{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:14px 0;color:var(--muted);font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:0 0 18px}.stats div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.stats b{display:block;font-size:26px;font-weight:600;font-variant-numeric:tabular-nums}.stats small{font-size:15px;color:var(--muted);font-weight:500}.stats span{font-size:13px;color:var(--muted)}
+.qstats{margin:0;padding:0 0 0 22px;display:grid;gap:10px}.qstats li{display:grid;grid-template-columns:1fr 160px 90px;gap:14px;align-items:center;font-size:14.5px}
+.bar{height:8px;border-radius:99px;background:var(--line2);overflow:hidden}.bar i{display:block;height:100%;background:var(--muted)}.bar i.hi{background:var(--ok)}.bar i.mid{background:var(--amber)}.bar i.lo{background:var(--bad)}
+.qs-n{font-size:13px;color:var(--muted);text-align:right}
+.addp details{margin-top:4px}.addp summary{cursor:pointer;color:var(--navy);font-size:14px}.addp details textarea{margin:10px 0}
+.addp>button{align-self:end}
+
+/* modal & toast */
+.modalbg{position:fixed;inset:0;z-index:40;background:rgba(10,15,22,.5);display:grid;place-items:center;padding:16px}
+.modal{background:var(--surface);border-radius:16px;padding:22px 24px;width:100%;max-width:560px;max-height:92vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.3)}.modal.wide{max-width:820px}
+.modal .mhead{display:flex;align-items:center;gap:16px;justify-content:space-between;margin-bottom:4px}.modal .mhead h2{margin:0}
+.modal .qlist>.q{padding-left:56px}.modal .qlist:not(.edit) .qn{width:38px;height:38px;font-size:15px}
+.modal label.full{display:grid;gap:5px;font-size:13.5px;color:var(--muted);margin-top:16px}
+.acts.sticky{position:sticky;bottom:-22px;background:var(--surface);padding:12px 0;margin-bottom:-12px;border-top:1px solid var(--line)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;font-size:14px;max-width:min(560px,90vw)}
+
+@media (max-width:640px){
+  .top .in{gap:8px 12px}.nav{order:3;flex-basis:100%}.who #who{display:none}
+  .qlist>.q{padding-left:0}.qlist:not(.edit) .qn{position:static;width:34px;height:34px;font-size:15px}.qlist:not(.edit) .qhead{margin-bottom:10px}
+  .modal .qlist>.q{padding-left:0}
+  .qstats li{grid-template-columns:1fr 70px}.qstats .bar{display:none}
+  .verdict{gap:18px}.stamp{width:110px;height:110px}.stamp b{font-size:28px}
+  .tbl td.acts{white-space:normal}.tbl td.acts>*{margin:3px 0 3px 6px}
+}
+</style>
+</head>
+<body>
+<div class="gate" id="gate"><div class="box"><img src="data:image/png;base64,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" alt=""><h1 data-t="gateH">Sign in to continue</h1><p id="gatemsg">Use your work Google account.</p>
+  <button class="btn primary big" id="login" data-t="signIn">Sign in with Google</button><button class="btn" id="gateOut" hidden data-t="signOut">Sign out</button></div></div>
+<div id="shell" hidden>
+  <header class="top"><div class="in">
+    <div class="brand"><img src="data:image/png;base64,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" alt=""><span data-t="app">Risk exams</span></div>
+    <nav class="nav"><a href="#home" data-v="home" data-t="navMine">My exams</a><a href="#manage" data-v="manage" class="adminonly" hidden data-t="navManage">Manage</a><a href="#people" data-v="people" class="adminonly" hidden data-t="navPeople">People</a></nav>
+    <div class="who"><span id="who"></span><button class="btn sm" id="langBtn" aria-haspopup="true" aria-label="Language">EN</button><button class="btn sm" id="logout" data-t="signOut">Sign out</button></div>
+  </div></header>
+  <main id="app"></main>
+</div>
+<div class="modalbg" id="modalbg" hidden><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
+<script>
+'use strict';
+// ---------- config ----------
+const OWNER = 'dgeorgiev@betty.ca'; // always an admin; must match the email in firestore.rules
+const MAX_TEXT = 4000;
+
+// ---------- languages ----------
+const DICT = {
+en: {
+  _name: 'English', _short: 'EN',
+  app: 'Risk exams', signIn: 'Sign in with Google', signOut: 'Sign out', gateH: 'Sign in to continue', gateP: 'Use your work Google account.',
+  noCfg: 'Firebase settings are missing in config.js.', signInFail: 'Sign-in failed: {e}',
+  noAccess: '{email} is not on the exam list yet. Ask Denis or your TL to add you.', loading: 'Loading…',
+  navMine: 'My exams', navManage: 'Manage', navPeople: 'People',
+  nextUp: 'Ready to take', start: 'Start exam', continue: 'Continue exam', questions: '{n} questions', minutes: '{n} min limit', noLimit: 'No time limit', pass: 'Pass mark {n}%',
+  open: 'Open', done: 'Completed', missed: 'Missed', waiting: 'Waiting for results', seeResult: 'See result', inProgress: 'In progress',
+  emptyMine: 'No exams for you right now. When an exam opens, it shows up here.',
+  submittedOn: 'Submitted {d}', of: '{a} of {b} answered', timeLeft: '{t} left', timeUp: 'Time is up – submitting your answers.',
+  submit: 'Submit answers', submitQ: 'Submit your answers? You can’t change them afterwards.', submitQ2: '{n} questions are unanswered. Submit anyway?',
+  submitted: 'Answers submitted.', submitFail: 'Couldn’t submit: {e}', back: 'Back',
+  pts1: '1 point', ptsN: '{n} points', single: 'Choose one', multi: 'Choose all that apply', text: 'Write your answer', textPh: 'Your answer…',
+  closedNow: 'This exam is closed.', alreadyDone: 'You already submitted this exam.',
+  passed: 'Passed', failed: 'Not passed', pending: 'Partly graded', score: '{g} of {m} points',
+  theirAns: 'Answer', chosen: 'Chosen', yourAns: 'Your answer', correctAns: 'Correct answer', noAnswer: 'No answer', explain: 'Explanation', model: 'What a good answer covers', reviewerNote: 'Reviewer’s note',
+  pendingGrade: 'Not graded yet', resultsHidden: 'Your answers are in. Results appear here once they are released.',
+  // manage
+  newExam: 'New exam', thTitle: 'Exam', thStatus: 'Status', thQ: 'Questions', thSub: 'Submitted', edit: 'Edit', results: 'Results', duplicate: 'New round', del: 'Delete',
+  delQ: 'Delete “{t}” with all its answers and grades?', deleted: 'Deleted.', dupDone: 'New round created as a draft.', untitled: 'Untitled exam',
+  st_draft: 'Draft', st_open: 'Open', st_closed: 'Closed', released: 'Results released', emptyManage: 'No exams yet. Create the first one.',
+  // editor
+  settings: 'Settings', title: 'Title', desc: 'Description for agents', timeLimit: 'Time limit (minutes, 0 = none)', passMark: 'Pass mark (%)',
+  partial: 'Partial points on “choose all” questions', status: 'Status', addSingle: 'One answer', addMulti: 'Several answers', addText: 'Text answer', addQ: 'Add question',
+  qType: 'Type', prompt: 'Question', option: 'Option {n}', addOpt: 'Add option', correct: 'Correct', points: 'Points', explainOpt: 'Explanation shown with the result (optional)',
+  modelAns: 'What a good answer covers (for grading)', moveUp: 'Move up', moveDown: 'Move down', copy: 'Duplicate', remove: 'Remove',
+  save: 'Save', saved: 'Saved.', saveFail: 'Couldn’t save: {e}', preview: 'Preview', importJ: 'Import questions', exportJ: 'Export questions', unsaved: 'You have unsaved changes. Leave anyway?',
+  importH: 'Paste questions as JSON', importDo: 'Add these questions', importBad: 'This isn’t valid question JSON: {e}', importOk: 'Added {n} questions.', cancel: 'Cancel', close: 'Close',
+  errNoQ: 'Add at least one question.', errPrompt: 'Question {n} has no text.', errOpts: 'Question {n} needs at least 2 options.', errCorrect: 'Question {n} has no correct answer marked.', errSingle: 'Question {n} allows one answer but has several marked correct.',
+  hasSubs: '{n} people already submitted. Changing options or answers changes their scores.', previewNote: 'Preview – answers are not saved.',
+  // results
+  people: 'People', thPerson: 'Person', thState: 'State', thScore: 'Score', notStarted: 'Not started', toGrade: '{n} to grade', graded: 'Graded',
+  relPend: '{n} people still have text answers to grade. Release the results anyway?', releaseOn: 'Release results', releaseOff: 'Hide results', releasedNote: 'Agents can see their results and the correct answers.', hiddenNote: 'Results are hidden from agents.',
+  openExam: 'Open exam', closeExam: 'Close exam', reopen: 'Reopen', avg: 'Average', subCount: 'Submitted', pendingCount: 'Waiting to be graded', perQ: 'Questions', qCorrect: '{n}% correct',
+  review: 'Review', saveGrade: 'Save grade', gradeSaved: 'Grade saved.', comment: 'Note for the agent (optional)', overall: 'Overall note (optional)', reset: 'Allow retake', resetQ: 'Delete {name}’s answers so they can take the exam again?', resetDone: 'They can take it again.',
+  exportCsv: 'Download CSV', notOnList: 'not on the list',
+  // people
+  addPerson: 'Add person', name: 'Name', email: 'Work email', role: 'Role', r_agent: 'Agent', r_admin: 'Admin', bulk: 'Add many: one per line, “Name, email”', bulkDo: 'Add all',
+  added: 'Added {n}.', badEmail: '“{e}” isn’t an email address.', removeQ: 'Remove {name} from the exam list?', owner: 'Owner', you: 'you',
+  peopleNote: 'Agents can take exams and see their own results. Admins can also create exams, grade and manage people.'
+},
+bg: {
+  _name: 'Български', _short: 'BG',
+  app: 'Изпити Risk', signIn: 'Вход с Google', signOut: 'Изход', gateH: 'Влез, за да продължиш', gateP: 'Използвай служебния си Google акаунт.',
+  noCfg: 'Липсват настройките на Firebase в config.js.', signInFail: 'Входът не стана: {e}',
+  noAccess: '{email} още не е в списъка за изпити. Помоли Денис или TL-а да те добави.', loading: 'Зареждам…',
+  navMine: 'Моите изпити', navManage: 'Управление', navPeople: 'Хора',
+  nextUp: 'Готов за решаване', start: 'Започни изпита', continue: 'Продължи изпита', questions: '{n} въпроса', minutes: 'Лимит {n} мин', noLimit: 'Без ограничение на времето', pass: 'Минимум {n}%',
+  open: 'Отворени', done: 'Решени', missed: 'Пропуснат', waiting: 'Чака резултати', seeResult: 'Виж резултата', inProgress: 'Започнат',
+  emptyMine: 'В момента няма изпити за теб. Когато се отвори изпит, ще се появи тук.',
+  submittedOn: 'Предаден {d}', of: 'Отговорени {a} от {b}', timeLeft: 'Остават {t}', timeUp: 'Времето изтече – предавам отговорите.',
+  submit: 'Предай отговорите', submitQ: 'Да предам ли отговорите? След това не могат да се променят.', submitQ2: '{n} въпроса са без отговор. Да предам ли все пак?',
+  submitted: 'Отговорите са предадени.', submitFail: 'Не успях да предам: {e}', back: 'Назад',
+  pts1: '1 точка', ptsN: '{n} точки', single: 'Избери един отговор', multi: 'Избери всички верни', text: 'Напиши отговора си', textPh: 'Твоят отговор…',
+  closedNow: 'Този изпит е затворен.', alreadyDone: 'Вече си предал този изпит.',
+  passed: 'Издържан', failed: 'Неиздържан', pending: 'Частично оценен', score: '{g} от {m} точки',
+  theirAns: 'Отговор', chosen: 'Избран', yourAns: 'Твоят отговор', correctAns: 'Верен отговор', noAnswer: 'Без отговор', explain: 'Обяснение', model: 'Какво трябва да съдържа добрият отговор', reviewerNote: 'Бележка от проверяващия',
+  pendingGrade: 'Още не е оценен', resultsHidden: 'Отговорите ти са предадени. Резултатите ще се появят тук, когато бъдат публикувани.',
+  newExam: 'Нов изпит', thTitle: 'Изпит', thStatus: 'Статус', thQ: 'Въпроси', thSub: 'Предали', edit: 'Редактирай', results: 'Резултати', duplicate: 'Нов кръг', del: 'Изтрий',
+  delQ: 'Да изтрия ли „{t}“ с всички отговори и оценки?', deleted: 'Изтрито.', dupDone: 'Новият кръг е създаден като чернова.', untitled: 'Изпит без име',
+  st_draft: 'Чернова', st_open: 'Отворен', st_closed: 'Затворен', released: 'Резултатите са публикувани', emptyManage: 'Още няма изпити. Създай първия.',
+  settings: 'Настройки', title: 'Заглавие', desc: 'Описание за агентите', timeLimit: 'Лимит (минути, 0 = без лимит)', passMark: 'Минимум за издържан (%)',
+  partial: 'Частични точки при „избери всички“', status: 'Статус', addSingle: 'Един отговор', addMulti: 'Няколко отговора', addText: 'Текстов отговор', addQ: 'Добави въпрос',
+  qType: 'Тип', prompt: 'Въпрос', option: 'Отговор {n}', addOpt: 'Добави отговор', correct: 'Верен', points: 'Точки', explainOpt: 'Обяснение, което се вижда с резултата (по желание)',
+  modelAns: 'Какво трябва да съдържа добрият отговор (за оценяване)', moveUp: 'Нагоре', moveDown: 'Надолу', copy: 'Копирай', remove: 'Премахни',
+  save: 'Запази', saved: 'Запазено.', saveFail: 'Не успях да запазя: {e}', preview: 'Преглед', importJ: 'Вмъкни въпроси', exportJ: 'Изнеси въпросите', unsaved: 'Има незапазени промени. Да изляза ли все пак?',
+  importH: 'Постави въпросите като JSON', importDo: 'Добави тези въпроси', importBad: 'Това не е валиден JSON с въпроси: {e}', importOk: 'Добавени {n} въпроса.', cancel: 'Отказ', close: 'Затвори',
+  errNoQ: 'Добави поне един въпрос.', errPrompt: 'Въпрос {n} няма текст.', errOpts: 'Въпрос {n} трябва да има поне 2 отговора.', errCorrect: 'Въпрос {n} няма маркиран верен отговор.', errSingle: 'Въпрос {n} е с един отговор, но има няколко маркирани като верни.',
+  hasSubs: '{n} души вече са предали. Промяна на отговорите или верните отговори променя техните точки.', previewNote: 'Преглед – отговорите не се записват.',
+  people: 'Хора', thPerson: 'Човек', thState: 'Състояние', thScore: 'Резултат', notStarted: 'Не е започнал', toGrade: '{n} за оценяване', graded: 'Оценен',
+  relPend: '{n} души още имат неоценени текстови отговори. Да публикувам ли резултатите все пак?', releaseOn: 'Публикувай резултатите', releaseOff: 'Скрий резултатите', releasedNote: 'Агентите виждат резултатите си и верните отговори.', hiddenNote: 'Резултатите са скрити от агентите.',
+  openExam: 'Отвори изпита', closeExam: 'Затвори изпита', reopen: 'Отвори отново', avg: 'Среден резултат', subCount: 'Предали', pendingCount: 'Чакат оценяване', perQ: 'Въпроси', qCorrect: '{n}% верни',
+  review: 'Прегледай', saveGrade: 'Запази оценката', gradeSaved: 'Оценката е запазена.', comment: 'Бележка за агента (по желание)', overall: 'Обща бележка (по желание)', reset: 'Позволи повторно', resetQ: 'Да изтрия ли отговорите на {name}, за да реши изпита отново?', resetDone: 'Може да го реши отново.',
+  exportCsv: 'Свали CSV', notOnList: 'не е в списъка',
+  addPerson: 'Добави човек', name: 'Име', email: 'Служебен имейл', role: 'Роля', r_agent: 'Агент', r_admin: 'Админ', bulk: 'Добави много: по един на ред, „Име, имейл“', bulkDo: 'Добави всички',
+  added: 'Добавени {n}.', badEmail: '„{e}“ не е имейл адрес.', removeQ: 'Да махна ли {name} от списъка за изпити?', owner: 'Собственик', you: 'ти',
+  peopleNote: 'Агентите решават изпити и виждат своите резултати. Админите също създават изпити, оценяват и управляват хората.'
+},
+el: {
+  _name: 'Ελληνικά', _short: 'ΕΛ',
+  app: 'Εξετάσεις Risk', signIn: 'Σύνδεση με Google', signOut: 'Αποσύνδεση', gateH: 'Συνδεθείτε για να συνεχίσετε', gateP: 'Χρησιμοποιήστε τον εταιρικό λογαριασμό Google.',
+  noCfg: 'Λείπουν οι ρυθμίσεις Firebase στο config.js.', signInFail: 'Η σύνδεση απέτυχε: {e}',
+  noAccess: 'Το {email} δεν είναι ακόμα στη λίστα εξετάσεων. Ζητήστε από τον Denis ή τον TL να σας προσθέσει.', loading: 'Φόρτωση…',
+  navMine: 'Οι εξετάσεις μου', navManage: 'Διαχείριση', navPeople: 'Άτομα',
+  nextUp: 'Έτοιμη για εσάς', start: 'Έναρξη εξέτασης', continue: 'Συνέχεια εξέτασης', questions: '{n} ερωτήσεις', minutes: 'Όριο {n} λεπτά', noLimit: 'Χωρίς χρονικό όριο', pass: 'Βάση {n}%',
+  open: 'Ανοιχτές', done: 'Ολοκληρωμένες', missed: 'Χάθηκε', waiting: 'Αναμονή αποτελεσμάτων', seeResult: 'Δείτε το αποτέλεσμα', inProgress: 'Σε εξέλιξη',
+  emptyMine: 'Δεν υπάρχουν εξετάσεις για εσάς αυτή τη στιγμή. Όταν ανοίξει μία, θα εμφανιστεί εδώ.',
+  submittedOn: 'Υποβλήθηκε {d}', of: '{a} από {b} απαντημένες', timeLeft: 'Απομένουν {t}', timeUp: 'Ο χρόνος τελείωσε – οι απαντήσεις υποβάλλονται.',
+  submit: 'Υποβολή απαντήσεων', submitQ: 'Υποβολή απαντήσεων; Δεν μπορούν να αλλάξουν μετά.', submitQ2: '{n} ερωτήσεις είναι αναπάντητες. Υποβολή παρ’ όλα αυτά;',
+  submitted: 'Οι απαντήσεις υποβλήθηκαν.', submitFail: 'Η υποβολή απέτυχε: {e}', back: 'Πίσω',
+  pts1: '1 βαθμός', ptsN: '{n} βαθμοί', single: 'Επιλέξτε ένα', multi: 'Επιλέξτε όλα τα σωστά', text: 'Γράψτε την απάντησή σας', textPh: 'Η απάντησή σας…',
+  closedNow: 'Αυτή η εξέταση έχει κλείσει.', alreadyDone: 'Έχετε ήδη υποβάλει αυτή την εξέταση.',
+  passed: 'Επιτυχία', failed: 'Αποτυχία', pending: 'Μερικώς βαθμολογημένη', score: '{g} από {m} βαθμούς',
+  theirAns: 'Απάντηση', chosen: 'Επιλογή', yourAns: 'Η απάντησή σας', correctAns: 'Σωστή απάντηση', noAnswer: 'Χωρίς απάντηση', explain: 'Εξήγηση', model: 'Τι πρέπει να περιέχει μια καλή απάντηση', reviewerNote: 'Σημείωση αξιολογητή',
+  pendingGrade: 'Δεν έχει βαθμολογηθεί ακόμα', resultsHidden: 'Οι απαντήσεις σας υποβλήθηκαν. Τα αποτελέσματα θα εμφανιστούν εδώ όταν δημοσιευτούν.',
+  newExam: 'Νέα εξέταση', thTitle: 'Εξέταση', thStatus: 'Κατάσταση', thQ: 'Ερωτήσεις', thSub: 'Υποβολές', edit: 'Επεξεργασία', results: 'Αποτελέσματα', duplicate: 'Νέος γύρος', del: 'Διαγραφή',
+  delQ: 'Διαγραφή της «{t}» με όλες τις απαντήσεις και βαθμολογίες;', deleted: 'Διαγράφηκε.', dupDone: 'Ο νέος γύρος δημιουργήθηκε ως πρόχειρο.', untitled: 'Εξέταση χωρίς τίτλο',
+  st_draft: 'Πρόχειρο', st_open: 'Ανοιχτή', st_closed: 'Κλειστή', released: 'Τα αποτελέσματα δημοσιεύτηκαν', emptyManage: 'Δεν υπάρχουν ακόμα εξετάσεις. Δημιουργήστε την πρώτη.',
+  settings: 'Ρυθμίσεις', title: 'Τίτλος', desc: 'Περιγραφή για τους υπαλλήλους', timeLimit: 'Χρονικό όριο (λεπτά, 0 = κανένα)', passMark: 'Βάση (%)',
+  partial: 'Μερική βαθμολογία στις ερωτήσεις «επιλέξτε όλα»', status: 'Κατάσταση', addSingle: 'Μία απάντηση', addMulti: 'Πολλές απαντήσεις', addText: 'Ελεύθερο κείμενο', addQ: 'Προσθήκη ερώτησης',
+  qType: 'Τύπος', prompt: 'Ερώτηση', option: 'Επιλογή {n}', addOpt: 'Προσθήκη επιλογής', correct: 'Σωστή', points: 'Βαθμοί', explainOpt: 'Εξήγηση που εμφανίζεται με το αποτέλεσμα (προαιρετικά)',
+  modelAns: 'Τι πρέπει να περιέχει μια καλή απάντηση (για βαθμολόγηση)', moveUp: 'Πάνω', moveDown: 'Κάτω', copy: 'Αντιγραφή', remove: 'Αφαίρεση',
+  save: 'Αποθήκευση', saved: 'Αποθηκεύτηκε.', saveFail: 'Αποτυχία αποθήκευσης: {e}', preview: 'Προεπισκόπηση', importJ: 'Εισαγωγή ερωτήσεων', exportJ: 'Εξαγωγή ερωτήσεων', unsaved: 'Υπάρχουν μη αποθηκευμένες αλλαγές. Έξοδος παρ’ όλα αυτά;',
+  importH: 'Επικολλήστε ερωτήσεις ως JSON', importDo: 'Προσθήκη ερωτήσεων', importBad: 'Δεν είναι έγκυρο JSON ερωτήσεων: {e}', importOk: 'Προστέθηκαν {n} ερωτήσεις.', cancel: 'Άκυρο', close: 'Κλείσιμο',
+  errNoQ: 'Προσθέστε τουλάχιστον μία ερώτηση.', errPrompt: 'Η ερώτηση {n} δεν έχει κείμενο.', errOpts: 'Η ερώτηση {n} χρειάζεται τουλάχιστον 2 επιλογές.', errCorrect: 'Η ερώτηση {n} δεν έχει σωστή απάντηση.', errSingle: 'Η ερώτηση {n} δέχεται μία απάντηση αλλά έχει πολλές σωστές.',
+  hasSubs: '{n} άτομα έχουν ήδη υποβάλει. Αλλαγές στις επιλογές ή στις σωστές απαντήσεις αλλάζουν τη βαθμολογία τους.', previewNote: 'Προεπισκόπηση – οι απαντήσεις δεν αποθηκεύονται.',
+  people: 'Άτομα', thPerson: 'Άτομο', thState: 'Κατάσταση', thScore: 'Βαθμολογία', notStarted: 'Δεν ξεκίνησε', toGrade: '{n} για βαθμολόγηση', graded: 'Βαθμολογήθηκε',
+  relPend: '{n} άτομα έχουν ακόμα αβαθμολόγητες απαντήσεις κειμένου. Δημοσίευση αποτελεσμάτων παρ’ όλα αυτά;', releaseOn: 'Δημοσίευση αποτελεσμάτων', releaseOff: 'Απόκρυψη αποτελεσμάτων', releasedNote: 'Οι υπάλληλοι βλέπουν τα αποτελέσματά τους και τις σωστές απαντήσεις.', hiddenNote: 'Τα αποτελέσματα είναι κρυφά για τους υπαλλήλους.',
+  openExam: 'Άνοιγμα εξέτασης', closeExam: 'Κλείσιμο εξέτασης', reopen: 'Επανάνοιγμα', avg: 'Μέσος όρος', subCount: 'Υποβολές', pendingCount: 'Αναμένουν βαθμολόγηση', perQ: 'Ερωτήσεις', qCorrect: '{n}% σωστές',
+  review: 'Έλεγχος', saveGrade: 'Αποθήκευση βαθμού', gradeSaved: 'Ο βαθμός αποθηκεύτηκε.', comment: 'Σημείωση για τον υπάλληλο (προαιρετικά)', overall: 'Γενική σημείωση (προαιρετικά)', reset: 'Επανάληψη', resetQ: 'Διαγραφή των απαντήσεων του/της {name} ώστε να ξαναδώσει την εξέταση;', resetDone: 'Μπορεί να την ξαναδώσει.',
+  exportCsv: 'Λήψη CSV', notOnList: 'εκτός λίστας',
+  addPerson: 'Προσθήκη ατόμου', name: 'Όνομα', email: 'Εταιρικό email', role: 'Ρόλος', r_agent: 'Υπάλληλος', r_admin: 'Διαχειριστής', bulk: 'Πολλά μαζί: ένα ανά γραμμή, «Όνομα, email»', bulkDo: 'Προσθήκη όλων',
+  added: 'Προστέθηκαν {n}.', badEmail: 'Το «{e}» δεν είναι διεύθυνση email.', removeQ: 'Αφαίρεση του/της {name} από τη λίστα εξετάσεων;', owner: 'Κάτοχος', you: 'εσείς',
+  peopleNote: 'Οι υπάλληλοι δίνουν εξετάσεις και βλέπουν τα δικά τους αποτελέσματα. Οι διαχειριστές επίσης δημιουργούν εξετάσεις, βαθμολογούν και διαχειρίζονται άτομα.'
+}
+};
+let LANG = (() => { try { const s = localStorage.getItem('exam:lang'); if (DICT[s]) return s; } catch (e) {} const n = (navigator.language || '').slice(0, 2); return n === 'bg' ? 'bg' : n === 'el' ? 'el' : 'en'; })();
+const t = (k, v) => { let s = DICT[LANG][k] ?? DICT.en[k] ?? k; return v ? s.replace(/\{(\w+)\}/g, (_, x) => v[x] ?? '') : s; };
+const pts = n => +n === 1 ? t('pts1') : t('ptsN', { n });
+
+// ---------- helpers ----------
+const $ = s => document.querySelector(s);
+const app = () => $('#app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nl = s => esc(s).replace(/\n/g, '<br>');
+const uid = () => Math.random().toString(36).slice(2, 10);
+const sid = (examId, email) => examId + '__' + email;
+const toDate = v => v && v.toDate ? v.toDate() : v ? new Date(v) : null;
+const fmtDate = v => { const d = toDate(v); return d ? d.toLocaleDateString(LANG === 'el' ? 'el-GR' : LANG === 'bg' ? 'bg-BG' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''; };
+const round = n => Math.round(n * 100) / 100;
+let toastT;
+function toast(m) { const el = $('#toast'); el.textContent = m; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 3600); }
+
+// ---------- scoring (same on admin and agent side) ----------
+function scoreOf(exam, key, sub, grade) {
+  let got = 0, max = 0, pending = 0; const per = {};
+  for (const q of exam.questions || []) {
+    const p = +q.points || 1; max += p;
+    const k = (key && key.q && key.q[q.id]) || {}, a = sub && sub.answers ? sub.answers[q.id] : undefined;
+    if (q.type === 'text') {
+      const g = grade && grade.text && grade.text[q.id];
+      if (!a || !String(a).trim()) per[q.id] = { got: 0, max: p, state: 'empty' };
+      else if (g && g.pts != null && g.pts !== '') { const v = Math.max(0, Math.min(p, +g.pts)); got += v; per[q.id] = { got: v, max: p, state: v >= p ? 'right' : v > 0 ? 'part' : 'wrong' }; }
+      else { pending++; per[q.id] = { got: 0, max: p, state: 'pending' }; }
+      continue;
+    }
+    const corr = new Set(k.correct || []), sel = new Set(Array.isArray(a) ? a : []);
+    let v = 0;
+    if (!sel.size) { per[q.id] = { got: 0, max: p, state: 'empty' }; continue; }
+    const exact = sel.size === corr.size && [...sel].every(x => corr.has(x));
+    if (exact) v = p;
+    else if (q.type === 'multi' && exam.partial && corr.size) { const right = [...sel].filter(x => corr.has(x)).length, wrong = sel.size - right; v = round(Math.max(0, (right - wrong) / corr.size) * p); }
+    got += v; per[q.id] = { got: v, max: p, state: v >= p ? 'right' : v > 0 ? 'part' : 'wrong' };
+  }
+  got = round(got);
+  return { got, max, pending, per, pct: max ? Math.round(got / max * 100) : 0 };
+}
+
+// ---------- state ----------
+let auth, db, me = null; // me = { email, name, role }
+const isAdmin = () => me && me.role === 'admin';
+let dirty = false; // editor has unsaved changes
+
+// ---------- data access ----------
+const col = c => db.collection(c);
+async function listMyExams() {
+  const [ex, subs, atts] = await Promise.all([
+    col('exams').where('status', 'in', ['open', 'closed']).get(),
+    col('submissions').where('email', '==', me.email).get(),
+    col('attempts').where('email', '==', me.email).get()
+  ]);
+  const S = {}, A = {};
+  subs.forEach(d => { S[d.data().examId] = d.data(); }); atts.forEach(d => { A[d.data().examId] = d.data(); });
+  const list = []; ex.forEach(d => list.push({ id: d.id, ...d.data() }));
+  list.sort((a, b) => (toDate(b.updatedAt) || 0) - (toDate(a.updatedAt) || 0));
+  return { list, S, A };
+}
+
+// ---------- routing ----------
+function route() {
+  const h = location.hash.slice(1) || 'home';
+  const [view, id] = [h.split('-')[0], h.slice(h.indexOf('-') + 1)];
+  document.querySelectorAll('.nav a').forEach(a => a.setAttribute('aria-current', a.dataset.v === (view === 'edit' || view === 'results' ? 'manage' : view === 'take' || view === 'result' ? 'home' : view) ? 'page' : 'false'));
+  window.scrollTo(0, 0);
+  stopTimer();
+  const a = app(); a.oninput = a.onclick = a.onchange = null;
+  if (!me) return;
+  if (view === 'take') return viewTake(id);
+  if (view === 'result') return viewResult(id);
+  if (view === 'preview' && isAdmin()) return viewTake(id, true);
+  if (view === 'manage' && isAdmin()) return viewManage();
+  if (view === 'edit' && isAdmin()) return viewEdit(id);
+  if (view === 'results' && isAdmin()) return viewResults(id);
+  if (view === 'people' && isAdmin()) return viewPeople();
+  return viewHome();
+}
+let lastHash = location.hash;
+window.addEventListener('hashchange', () => {
+  if (dirty && !confirm(t('unsaved'))) { history.replaceState(null, '', lastHash || '#home'); return; }
+  dirty = false; lastHash = location.hash; route();
+});
+window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+const go = h => { if (location.hash === '#' + h) route(); else location.hash = h; };
+const loading = () => { app().innerHTML = `<p class="muted pad">${t('loading')}</p>`; };
+const fail = e => { console.error(e); app().innerHTML = `<p class="err pad">${esc(e.message || e.code || e)}</p>`; };
+
+// ---------- agent: home ----------
+async function viewHome() {
+  loading();
+  try {
+    const { list, S, A } = await listMyExams();
+    const openNot = list.filter(x => x.status === 'open' && !S[x.id]);
+    const done = list.filter(x => S[x.id]);
+    const missed = list.filter(x => x.status === 'closed' && !S[x.id]);
+    const meta = x => `<span>${t('questions', { n: (x.questions || []).length })}</span><span>${+x.timeLimit ? t('minutes', { n: x.timeLimit }) : t('noLimit')}</span><span>${t('pass', { n: x.passMark ?? 80 })}</span>`;
+    let h = '';
+    if (openNot.length) {
+      const x = openNot[0];
+      h += `<section class="hero"><p class="kicker">${t('nextUp')}</p><h1>${esc(x.title || t('untitled'))}</h1>${x.desc ? `<p class="lede">${nl(x.desc)}</p>` : ''}<p class="meta">${meta(x)}</p>
+        <a class="btn primary big" href="#take-${x.id}">${A[x.id] ? t('continue') : t('start')}</a></section>`;
+      if (openNot.length > 1) {
+        h += `<h2 class="sec">${t('open')}</h2><ul class="rows">`;
+        for (const y of openNot.slice(1)) h += `<li><a href="#take-${y.id}"><b>${esc(y.title || t('untitled'))}</b><span class="meta">${meta(y)}</span><span class="tag ${A[y.id] ? 'amber' : ''}">${A[y.id] ? t('inProgress') : t('start')}</span></a></li>`;
+        h += '</ul>';
+      }
+    }
+    if (done.length || missed.length) {
+      h += `<h2 class="sec">${t('done')}</h2><ul class="rows">`;
+      for (const y of done) h += `<li><a href="#result-${y.id}"><b>${esc(y.title || t('untitled'))}</b><span class="meta">${t('submittedOn', { d: fmtDate(S[y.id].submittedAt) })}</span><span class="tag ${y.released ? 'ok' : 'amber'}">${y.released ? t('seeResult') : t('waiting')}</span></a></li>`;
+      for (const y of missed) h += `<li><div class="rowdiv"><b>${esc(y.title || t('untitled'))}</b><span class="meta"></span><span class="tag">${t('missed')}</span></div></li>`;
+      h += '</ul>';
+    }
+    if (!h) h = `<section class="empty"><h1>${t('navMine')}</h1><p>${t('emptyMine')}</p></section>`;
+    app().innerHTML = h;
+  } catch (e) { fail(e); }
+}
+
+// ---------- agent: take exam ----------
+let timer = null;
+function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
+const draftKey = id => 'exam:draft:' + me.email + ':' + id;
+function loadDraft(id) { try { return JSON.parse(localStorage.getItem(draftKey(id))) || {}; } catch (e) { return {}; } }
+function saveDraft(id, a) { try { localStorage.setItem(draftKey(id), JSON.stringify(a)); } catch (e) {} }
+
+async function viewTake(id, preview) {
+  loading();
+  try {
+    const ed = await col('exams').doc(id).get();
+    if (!ed.exists) throw new Error('Not found');
+    const exam = { id, ...ed.data() };
+    let attempt = null;
+    if (!preview) {
+      const sd = await col('submissions').doc(sid(id, me.email)).get();
+      if (sd.exists) { go('result-' + id); return; }
+      if (exam.status !== 'open') { app().innerHTML = `<section class="empty"><h1>${esc(exam.title)}</h1><p>${t('closedNow')}</p><a class="btn" href="#home">${t('back')}</a></section>`; return; }
+      const ref = col('attempts').doc(sid(id, me.email));
+      let ad = await ref.get();
+      if (!ad.exists) { await ref.set({ examId: id, email: me.email, name: me.name, startedAt: firebase.firestore.FieldValue.serverTimestamp() }); ad = await ref.get(); }
+      attempt = ad.data();
+    }
+    const answers = preview ? {} : loadDraft(id);
+    const qs = exam.questions || [];
+    let h = `<div class="takehead"><a class="back" href="${preview ? '#edit-' + id : '#home'}">← ${t('back')}</a><h1>${esc(exam.title || t('untitled'))}</h1>${exam.desc ? `<p class="lede">${nl(exam.desc)}</p>` : ''}${preview ? `<p class="note">${t('previewNote')}</p>` : ''}</div><ol class="qlist">`;
+    qs.forEach((q, i) => {
+      const a = answers[q.id];
+      h += `<li class="q" data-q="${q.id}"><div class="qhead"><span class="qn">${i + 1}</span><span class="qpts">${pts(q.points || 1)}</span></div><p class="qtext">${nl(q.text)}</p><p class="qhint">${t(q.type)}</p>`;
+      if (q.type === 'text') h += `<textarea class="ta" data-text="${q.id}" maxlength="${MAX_TEXT}" rows="5" placeholder="${esc(t('textPh'))}">${esc(a || '')}</textarea>`;
+      else {
+        h += '<div class="opts">';
+        (q.options || []).forEach((o, j) => { const on = Array.isArray(a) && a.includes(j); h += `<label class="opt"><input type="${q.type === 'single' ? 'radio' : 'checkbox'}" name="q_${q.id}" value="${j}" ${on ? 'checked' : ''}><span>${nl(o)}</span></label>`; });
+        h += '</div>';
+      }
+      h += '</li>';
+    });
+    h += `</ol><div class="submitbar"><span id="progress"></span><span id="clock" class="clock" hidden></span>${preview ? '' : `<button class="btn primary" id="submitBtn">${t('submit')}</button>`}</div>`;
+    app().innerHTML = h;
+    const answered = () => qs.filter(q => { const a = answers[q.id]; return q.type === 'text' ? a && String(a).trim() : Array.isArray(a) && a.length; }).length;
+    const upd = () => { $('#progress').textContent = t('of', { a: answered(), b: qs.length }); };
+    upd();
+    app().oninput = e => {
+      const q = e.target.closest('.q'); if (!q) return; const qid = q.dataset.q, Q = qs.find(x => x.id === qid);
+      if (Q.type === 'text') answers[qid] = e.target.value.slice(0, MAX_TEXT);
+      else answers[qid] = [...q.querySelectorAll('input:checked')].map(x => +x.value);
+      if (!preview) saveDraft(id, answers); upd();
+    };
+    app().onclick = null;
+    if (preview) return;
+    let sending = false;
+    const send = async (auto) => {
+      if (sending) return;
+      if (!auto) { const left = qs.length - answered(); if (!confirm(left ? t('submitQ2', { n: left }) : t('submitQ'))) return; }
+      sending = true; $('#submitBtn').disabled = true; stopTimer();
+      const clean = {};
+      for (const q of qs) { const a = answers[q.id]; if (q.type === 'text') { if (a && String(a).trim()) clean[q.id] = String(a).slice(0, MAX_TEXT); } else if (Array.isArray(a) && a.length) clean[q.id] = a; }
+      try {
+        await col('submissions').doc(sid(id, me.email)).set({ examId: id, email: me.email, name: me.name, answers: clean, submittedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        try { localStorage.removeItem(draftKey(id)); } catch (e) {}
+        toast(t('submitted')); go('result-' + id);
+      } catch (e) { sending = false; $('#submitBtn').disabled = false; toast(t('submitFail', { e: e.message || e.code })); }
+    };
+    $('#submitBtn').addEventListener('click', () => send(false));
+    const lim = +exam.timeLimit;
+    if (lim && attempt && attempt.startedAt) {
+      const end = toDate(attempt.startedAt).getTime() + lim * 60000, clock = $('#clock'); clock.hidden = false;
+      const tick = () => {
+        const ms = end - Date.now();
+        if (ms <= 0) { clock.textContent = t('timeLeft', { t: '0:00' }); toast(t('timeUp')); send(true); return; }
+        const m = Math.floor(ms / 60000), s = Math.floor(ms % 60000 / 1000);
+        clock.textContent = t('timeLeft', { t: m + ':' + String(s).padStart(2, '0') }); clock.classList.toggle('low', ms < 120000);
+      };
+      tick(); timer = setInterval(tick, 1000);
+    }
+  } catch (e) { fail(e); }
+}
+
+// ---------- agent: result ----------
+function reviewHtml(exam, key, sub, grade, sc, editable) {
+  let h = '<ol class="qlist review">';
+  (exam.questions || []).forEach((q, i) => {
+    const k = (key && key.q && key.q[q.id]) || {}, a = sub.answers ? sub.answers[q.id] : undefined, r = sc.per[q.id] || {};
+    h += `<li class="q st-${r.state}"><div class="qhead"><span class="qn">${i + 1}</span><span class="qpts">${r.state === 'pending' ? t('pendingGrade') : round(r.got) + ' / ' + r.max}</span></div><p class="qtext">${nl(q.text)}</p>`;
+    if (q.type === 'text') {
+      h += `<p class="lbl">${editable ? t('theirAns') : t('yourAns')}</p><div class="answer">${a ? nl(a) : `<i>${t('noAnswer')}</i>`}</div>`;
+      if (k.model) h += `<p class="lbl">${t('model')}</p><div class="answer model">${nl(k.model)}</div>`;
+      const g = (grade && grade.text && grade.text[q.id]) || {};
+      if (editable) h += `<div class="grade"><label>${t('points')}<span class="pin"><input type="number" min="0" max="${q.points || 1}" step="0.5" data-gp="${q.id}" value="${g.pts ?? ''}"> / ${q.points || 1}</span></label><label class="grow">${t('comment')}<input type="text" data-gc="${q.id}" value="${esc(g.comment || '')}"></label></div>`;
+      else if (g.comment) h += `<p class="lbl">${t('reviewerNote')}</p><div class="answer note2">${nl(g.comment)}</div>`;
+    } else {
+      const corr = new Set(k.correct || []), sel = new Set(Array.isArray(a) ? a : []);
+      h += '<ul class="ropts">';
+      (q.options || []).forEach((o, j) => { const c = corr.has(j), s = sel.has(j); h += `<li class="${c ? 'is-c' : ''} ${s ? 'is-s' : ''} ${s && !c ? 'is-w' : ''}"><span class="mark">${s ? (c ? '✓' : '✗') : c ? '✓' : ''}</span><span>${nl(o)}</span>${s ? `<em>${editable ? t('chosen') : t('yourAns')}</em>` : c ? `<em>${t('correctAns')}</em>` : ''}</li>`; });
+      h += '</ul>'; if (!sel.size) h += `<p class="muted small">${t('noAnswer')}</p>`;
+    }
+    if (k.explain) h += `<p class="lbl">${t('explain')}</p><div class="answer">${nl(k.explain)}</div>`;
+    h += '</li>';
+  });
+  return h + '</ol>';
+}
+function stampHtml(exam, sc) {
+  const pass = sc.pending ? null : sc.pct >= (exam.passMark ?? 80);
+  return `<div class="stamp ${pass === null ? 'pend' : pass ? 'pass' : 'fail'}"><b>${sc.pct}%</b><span>${pass === null ? t('pending') : pass ? t('passed') : t('failed')}</span></div>`;
+}
+async function viewResult(id) {
+  loading();
+  try {
+    const [ed, sd] = await Promise.all([col('exams').doc(id).get(), col('submissions').doc(sid(id, me.email)).get()]);
+    if (!ed.exists) throw new Error('Not found');
+    const exam = { id, ...ed.data() };
+    if (!sd.exists) { go('take-' + id); return; }
+    const sub = sd.data();
+    let h = `<div class="takehead"><a class="back" href="#home">← ${t('back')}</a><h1>${esc(exam.title || t('untitled'))}</h1><p class="meta"><span>${t('submittedOn', { d: fmtDate(sub.submittedAt) })}</span></p></div>`;
+    if (!exam.released) { app().innerHTML = h + `<section class="empty soft"><p>${t('resultsHidden')}</p></section>`; return; }
+    const [kd, gd] = await Promise.all([col('examKeys').doc(id).get(), col('grades').doc(sid(id, me.email)).get().catch(() => null)]);
+    const key = kd.exists ? kd.data() : {}, grade = gd && gd.exists ? gd.data() : null;
+    const sc = scoreOf(exam, key, sub, grade);
+    h += `<section class="verdict">${stampHtml(exam, sc)}<div><p class="big2">${t('score', { g: sc.got, m: sc.max })}</p><p class="muted">${t('pass', { n: exam.passMark ?? 80 })}</p>${grade && grade.comment ? `<p class="lbl">${t('reviewerNote')}</p><p>${nl(grade.comment)}</p>` : ''}</div></section>`;
+    h += reviewHtml(exam, key, sub, grade, sc, false);
+    app().innerHTML = h;
+  } catch (e) { fail(e); }
+}
+
+// ---------- admin: manage ----------
+async function viewManage() {
+  loading();
+  try {
+    const [ex, subs] = await Promise.all([col('exams').get(), col('submissions').get()]);
+    const cnt = {}; subs.forEach(d => { const k = d.data().examId; cnt[k] = (cnt[k] || 0) + 1; });
+    const list = []; ex.forEach(d => list.push({ id: d.id, ...d.data() }));
+    list.sort((a, b) => (toDate(b.updatedAt) || 0) - (toDate(a.updatedAt) || 0));
+    let h = `<div class="pagehead"><h1>${t('navManage')}</h1><button class="btn primary" id="newExam">${t('newExam')}</button></div>`;
+    if (!list.length) h += `<section class="empty soft"><p>${t('emptyManage')}</p></section>`;
+    else {
+      h += `<div class="tblwrap"><table class="tbl"><thead><tr><th>${t('thTitle')}</th><th>${t('thStatus')}</th><th class="num">${t('thQ')}</th><th class="num">${t('thSub')}</th><th></th></tr></thead><tbody>`;
+      for (const x of list) h += `<tr><td><a href="#results-${x.id}"><b>${esc(x.title || t('untitled'))}</b></a></td><td><span class="tag st-${x.status}">${t('st_' + x.status)}</span>${x.released ? ` <span class="tag ok">${t('released')}</span>` : ''}</td><td class="num">${(x.questions || []).length}</td><td class="num">${cnt[x.id] || 0}</td>
+        <td class="acts"><a class="btn sm" href="#edit-${x.id}">${t('edit')}</a><a class="btn sm" href="#results-${x.id}">${t('results')}</a><button class="btn sm" data-dup="${x.id}">${t('duplicate')}</button><button class="btn sm danger" data-del="${x.id}">${t('del')}</button></td></tr>`;
+      h += '</tbody></table></div>';
+    }
+    app().innerHTML = h;
+    $('#newExam').onclick = async () => {
+      const ref = col('exams').doc(); const now = firebase.firestore.FieldValue.serverTimestamp();
+      const b = db.batch();
+      b.set(ref, { title: '', desc: '', status: 'draft', released: false, timeLimit: 0, passMark: 80, partial: false, questions: [], createdAt: now, updatedAt: now, createdBy: me.email });
+      b.set(col('examKeys').doc(ref.id), { q: {} });
+      try { await b.commit(); go('edit-' + ref.id); } catch (e) { toast(t('saveFail', { e: e.message })); }
+    };
+    app().onclick = async e => {
+      const dup = e.target.closest('[data-dup]'), del = e.target.closest('[data-del]');
+      if (dup) {
+        const id = dup.dataset.dup, x = list.find(y => y.id === id), kd = await col('examKeys').doc(id).get();
+        const ref = col('exams').doc(), now = firebase.firestore.FieldValue.serverTimestamp(), b = db.batch();
+        const title = (x.title || t('untitled')).replace(/\s*\(\d+\)$/, '') + ' (' + (list.filter(y => (y.title || '').startsWith((x.title || '').replace(/\s*\(\d+\)$/, ''))).length + 1) + ')';
+        const { id: _old, ...rest } = x;
+        b.set(ref, { ...rest, title, status: 'draft', released: false, createdAt: now, updatedAt: now, createdBy: me.email });
+        b.set(col('examKeys').doc(ref.id), kd.exists ? kd.data() : { q: {} });
+        try { await b.commit(); toast(t('dupDone')); go('edit-' + ref.id); } catch (err) { toast(t('saveFail', { e: err.message })); }
+      }
+      if (del) {
+        const id = del.dataset.del, x = list.find(y => y.id === id);
+        if (!confirm(t('delQ', { t: x.title || t('untitled') }))) return;
+        try {
+          const b = db.batch();
+          for (const c of ['submissions', 'attempts', 'grades']) (await col(c).where('examId', '==', id).get()).forEach(d => b.delete(d.ref));
+          b.delete(col('exams').doc(id)); b.delete(col('examKeys').doc(id)); await b.commit();
+          toast(t('deleted')); viewManage();
+        } catch (err) { toast(t('saveFail', { e: err.message })); }
+      }
+    };
+  } catch (e) { fail(e); }
+}
+
+// ---------- admin: editor ----------
+async function viewEdit(id) {
+  loading();
+  try {
+    const [ed, kd, sc] = await Promise.all([col('exams').doc(id).get(), col('examKeys').doc(id).get(), col('submissions').where('examId', '==', id).get()]);
+    if (!ed.exists) throw new Error('Not found');
+    const exam = ed.data(), key = kd.exists ? kd.data() : { q: {} };
+    // working copy: questions with their key merged in
+    const W = {
+      title: exam.title || '', desc: exam.desc || '', status: exam.status || 'draft', timeLimit: +exam.timeLimit || 0, passMark: exam.passMark ?? 80, partial: !!exam.partial,
+      qs: (exam.questions || []).map(q => ({ ...q, options: [...(q.options || [])], correct: [...((key.q[q.id] || {}).correct || [])], model: (key.q[q.id] || {}).model || '', explain: (key.q[q.id] || {}).explain || '' }))
+    };
+    const nSubs = sc.size;
+    const newQ = type => ({ id: uid(), type, text: '', options: type === 'text' ? [] : ['', ''], correct: [], points: 1, model: '', explain: '' });
+    function draw() {
+      let h = `<div class="pagehead"><a class="back" href="#manage">← ${t('navManage')}</a><h1>${esc(W.title || t('untitled'))}</h1>
+        <div class="acts"><a class="btn" href="#preview-${id}" id="pvBtn">${t('preview')}</a><button class="btn" id="exBtn">${t('exportJ')}</button><button class="btn" id="imBtn">${t('importJ')}</button><button class="btn primary" id="saveBtn">${t('save')}</button></div></div>`;
+      if (nSubs) h += `<p class="note">${t('hasSubs', { n: nSubs })}</p>`;
+      h += `<section class="card form"><h2>${t('settings')}</h2>
+        <label class="full">${t('title')}<input data-w="title" value="${esc(W.title)}"></label>
+        <label class="full">${t('desc')}<textarea data-w="desc" rows="2">${esc(W.desc)}</textarea></label>
+        <label>${t('status')}<select data-w="status">${['draft', 'open', 'closed'].map(s => `<option value="${s}" ${W.status === s ? 'selected' : ''}>${t('st_' + s)}</option>`).join('')}</select></label>
+        <label>${t('timeLimit')}<input type="number" min="0" max="600" data-w="timeLimit" value="${W.timeLimit}"></label>
+        <label>${t('passMark')}<input type="number" min="0" max="100" data-w="passMark" value="${W.passMark}"></label>
+        <label class="check"><input type="checkbox" data-w="partial" ${W.partial ? 'checked' : ''}>${t('partial')}</label></section><ol class="qlist edit">`;
+      W.qs.forEach((q, i) => {
+        h += `<li class="q card" data-i="${i}"><div class="qhead"><span class="qn">${i + 1}</span>
+          <select data-f="type" aria-label="${t('qType')}">${['single', 'multi', 'text'].map(x => `<option value="${x}" ${q.type === x ? 'selected' : ''}>${t(x === 'single' ? 'addSingle' : x === 'multi' ? 'addMulti' : 'addText')}</option>`).join('')}</select>
+          <label class="ptsin">${t('points')}<input type="number" min="0.5" step="0.5" data-f="points" value="${q.points}"></label>
+          <span class="grow"></span><button class="icon" data-a="up" title="${t('moveUp')}" aria-label="${t('moveUp')}" ${i ? '' : 'disabled'}>↑</button><button class="icon" data-a="down" title="${t('moveDown')}" aria-label="${t('moveDown')}" ${i < W.qs.length - 1 ? '' : 'disabled'}>↓</button><button class="icon" data-a="copy" title="${t('copy')}" aria-label="${t('copy')}">⧉</button><button class="icon danger" data-a="rm" title="${t('remove')}" aria-label="${t('remove')}">✕</button></div>
+          <label class="full">${t('prompt')}<textarea data-f="text" rows="2">${esc(q.text)}</textarea></label>`;
+        if (q.type === 'text') h += `<label class="full">${t('modelAns')}<textarea data-f="model" rows="2">${esc(q.model)}</textarea></label>`;
+        else {
+          h += '<div class="eopts">';
+          q.options.forEach((o, j) => { h += `<div class="eopt"><label class="cbox" title="${t('correct')}"><input type="${q.type === 'single' ? 'radio' : 'checkbox'}" name="c_${q.id}" data-c="${j}" ${q.correct.includes(j) ? 'checked' : ''}><span>${t('correct')}</span></label><input data-o="${j}" value="${esc(o)}" placeholder="${esc(t('option', { n: j + 1 }))}"><button class="icon" data-a="rmopt" data-j="${j}" aria-label="${t('remove')}" ${q.options.length > 2 ? '' : 'disabled'}>✕</button></div>`; });
+          h += `<button class="btn sm" data-a="addopt">+ ${t('addOpt')}</button></div>`;
+        }
+        h += `<label class="full">${t('explainOpt')}<textarea data-f="explain" rows="1">${esc(q.explain)}</textarea></label></li>`;
+      });
+      h += `</ol><div class="addq"><span>${t('addQ')}</span><button class="btn" data-add="single">+ ${t('addSingle')}</button><button class="btn" data-add="multi">+ ${t('addMulti')}</button><button class="btn" data-add="text">+ ${t('addText')}</button></div>`;
+      app().innerHTML = h;
+      $('#saveBtn').onclick = save;
+      $('#exBtn').onclick = () => {
+        const out = { title: W.title, desc: W.desc, questions: W.qs.map(q => { const o = { type: q.type, q: q.text, points: +q.points || 1 }; if (q.type !== 'text') { o.options = q.options; o.correct = q.correct; } else o.answer = q.model; if (q.explain) o.explain = q.explain; return o; }) };
+        const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' }), a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = (W.title || 'exam').replace(/[^\w\-]+/g, '_') + '.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      };
+      $('#imBtn').onclick = openImport;
+      $('#pvBtn').onclick = e => { if (dirty) { e.preventDefault(); toast(t('unsaved')); } };
+    }
+    function openImport() {
+      modal(`<h2>${t('importH')}</h2><textarea id="imTxt" rows="12" class="mono" placeholder='[{"type":"single","q":"…","options":["…","…"],"correct":[0],"points":1}]'></textarea><p class="err" id="imErr"></p><div class="acts end"><button class="btn" data-close>${t('cancel')}</button><button class="btn primary" id="imDo">${t('importDo')}</button></div>`);
+      $('#imDo').onclick = () => {
+        try {
+          let v = JSON.parse($('#imTxt').value); if (!Array.isArray(v)) v = v.questions; if (!Array.isArray(v)) throw new Error('expected a list of questions');
+          const add = v.map((x, i) => {
+            const type = ['single', 'multi', 'text'].includes(x.type) ? x.type : Array.isArray(x.options) ? ((x.correct || []).length > 1 ? 'multi' : 'single') : 'text';
+            const text = String(x.q ?? x.question ?? x.text ?? '').trim(); if (!text) throw new Error('#' + (i + 1) + ': no question text');
+            const q = { id: uid(), type, text, options: type === 'text' ? [] : (x.options || []).map(String), correct: type === 'text' ? [] : (x.correct || []).map(Number), points: +x.points || 1, model: type === 'text' ? String(x.answer ?? x.model ?? '') : '', explain: String(x.explain ?? '') };
+            if (type !== 'text' && q.options.length < 2) throw new Error('#' + (i + 1) + ': needs 2+ options');
+            return q;
+          });
+          W.qs.push(...add); dirty = true; closeModal(); draw(); toast(t('importOk', { n: add.length }));
+        } catch (e) { $('#imErr').textContent = t('importBad', { e: e.message }); }
+      };
+    }
+    function validate() {
+      if (!W.qs.length && W.status !== 'draft') return t('errNoQ');
+      for (let i = 0; i < W.qs.length; i++) {
+        const q = W.qs[i], n = i + 1;
+        if (!q.text.trim()) return t('errPrompt', { n });
+        if (q.type !== 'text') {
+          if (q.options.filter(o => o.trim()).length < 2) return t('errOpts', { n });
+          if (!q.correct.length) return t('errCorrect', { n });
+          if (q.type === 'single' && q.correct.length > 1) return t('errSingle', { n });
+        }
+      }
+      return null;
+    }
+    async function save() {
+      const err = validate(); if (err) { toast(err); return; }
+      const qsOut = [], keyOut = {};
+      for (const q of W.qs) {
+        // drop empty options and remap the correct indexes
+        let options = q.options, correct = q.correct;
+        if (q.type !== 'text') { const keep = q.options.map((o, j) => o.trim() ? j : -1).filter(j => j >= 0); options = keep.map(j => q.options[j].trim()); correct = q.correct.map(c => keep.indexOf(c)).filter(c => c >= 0); }
+        qsOut.push({ id: q.id, type: q.type, text: q.text.trim(), options: q.type === 'text' ? [] : options, points: +q.points || 1 });
+        keyOut[q.id] = { correct: q.type === 'text' ? [] : correct, model: q.type === 'text' ? q.model : '', explain: q.explain };
+      }
+      const b = db.batch();
+      b.update(col('exams').doc(id), { title: W.title.trim(), desc: W.desc.trim(), status: W.status, timeLimit: Math.max(0, Math.round(+W.timeLimit || 0)), passMark: Math.max(0, Math.min(100, +W.passMark || 0)), partial: W.partial, questions: qsOut, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      b.set(col('examKeys').doc(id), { q: keyOut });
+      try { await b.commit(); dirty = false; toast(t('saved')); W.qs.forEach((q, i) => { q.options = qsOut[i].options; q.correct = keyOut[q.id].correct; }); draw(); } catch (e) { toast(t('saveFail', { e: e.message || e.code })); }
+    }
+    app().oninput = e => {
+      const el = e.target;
+      if (el.dataset.w) { const k = el.dataset.w; W[k] = el.type === 'checkbox' ? el.checked : el.value; if (k === 'title') document.querySelector('.pagehead h1').textContent = el.value || t('untitled'); dirty = true; return; }
+      const li = el.closest('.q'); if (!li) return; const q = W.qs[+li.dataset.i];
+      if (el.dataset.f === 'type') { q.type = el.value; if (q.type === 'text') { q.options = []; q.correct = []; } else { if (q.options.length < 2) q.options = ['', '']; if (q.type === 'single') q.correct = q.correct.slice(0, 1); } dirty = true; draw(); return; }
+      if (el.dataset.f) q[el.dataset.f] = el.dataset.f === 'points' ? el.value : el.value;
+      if (el.dataset.o != null) q.options[+el.dataset.o] = el.value;
+      if (el.dataset.c != null) q.correct = q.type === 'single' ? [+el.dataset.c] : [...li.querySelectorAll('[data-c]:checked')].map(x => +x.dataset.c);
+      dirty = true;
+    };
+    app().onclick = e => {
+      const add = e.target.closest('[data-add]'); if (add) { W.qs.push(newQ(add.dataset.add)); dirty = true; draw(); const last = app().querySelector('.qlist.edit > li:last-child textarea'); last && last.focus(); return; }
+      const b = e.target.closest('[data-a]'); if (!b) return; const li = b.closest('.q'), i = +li.dataset.i, q = W.qs[i];
+      if (b.dataset.a === 'up' && i) [W.qs[i - 1], W.qs[i]] = [W.qs[i], W.qs[i - 1]];
+      else if (b.dataset.a === 'down' && i < W.qs.length - 1) [W.qs[i + 1], W.qs[i]] = [W.qs[i], W.qs[i + 1]];
+      else if (b.dataset.a === 'copy') W.qs.splice(i + 1, 0, { ...q, id: uid(), options: [...q.options], correct: [...q.correct] });
+      else if (b.dataset.a === 'rm') W.qs.splice(i, 1);
+      else if (b.dataset.a === 'addopt') q.options.push('');
+      else if (b.dataset.a === 'rmopt') { const j = +b.dataset.j; q.options.splice(j, 1); q.correct = q.correct.filter(c => c !== j).map(c => c > j ? c - 1 : c); }
+      else return;
+      dirty = true; draw();
+    };
+    draw();
+  } catch (e) { fail(e); }
+}
+
+// ---------- admin: results ----------
+async function viewResults(id) {
+  loading();
+  try {
+    const [ed, kd, us, ss, as, gs] = await Promise.all([col('exams').doc(id).get(), col('examKeys').doc(id).get(), col('examUsers').get(),
+      col('submissions').where('examId', '==', id).get(), col('attempts').where('examId', '==', id).get(), col('grades').where('examId', '==', id).get()]);
+    if (!ed.exists) throw new Error('Not found');
+    const exam = { id, ...ed.data() }, key = kd.exists ? kd.data() : { q: {} };
+    const S = {}, A = {}, G = {}, P = {};
+    ss.forEach(d => { S[d.data().email] = d.data(); }); as.forEach(d => { A[d.data().email] = d.data(); }); gs.forEach(d => { G[d.data().email] = d.data(); });
+    us.forEach(d => { P[d.id] = d.data(); });
+    const emails = [...new Set([...Object.keys(P).filter(e => P[e].role !== 'admin' || S[e] || A[e]), ...Object.keys(S), ...Object.keys(A)])];
+    const rows = emails.map(e => { const s = S[e]; const sc = s ? scoreOf(exam, key, s, G[e]) : null; return { e, name: (P[e] && P[e].name) || (s && s.name) || e, s, a: A[e], sc }; })
+      .sort((x, y) => (y.s ? 1 : 0) - (x.s ? 1 : 0) || x.name.localeCompare(y.name));
+    const subs = rows.filter(r => r.s), pend = subs.filter(r => r.sc.pending).length;
+    const avg = subs.length ? Math.round(subs.reduce((a, r) => a + r.sc.pct, 0) / subs.length) : null;
+    let h = `<div class="pagehead"><a class="back" href="#manage">← ${t('navManage')}</a><h1>${esc(exam.title || t('untitled'))}</h1>
+      <div class="acts"><a class="btn" href="#edit-${id}">${t('edit')}</a><button class="btn" id="csvBtn">${t('exportCsv')}</button>
+      ${exam.status === 'open' ? `<button class="btn" data-st="closed">${t('closeExam')}</button>` : `<button class="btn" data-st="open">${exam.status === 'closed' ? t('reopen') : t('openExam')}</button>`}
+      <button class="btn ${exam.released ? '' : 'primary'}" id="relBtn">${exam.released ? t('releaseOff') : t('releaseOn')}</button></div></div>
+      <p class="note ${exam.released ? 'okn' : ''}">${exam.released ? t('releasedNote') : t('hiddenNote')}</p>
+      <div class="stats"><div><b>${subs.length}<small> / ${rows.length}</small></b><span>${t('subCount')}</span></div><div><b>${avg == null ? '–' : avg + '%'}</b><span>${t('avg')}</span></div><div><b>${pend}</b><span>${t('pendingCount')}</span></div></div>
+      <div class="tblwrap"><table class="tbl"><thead><tr><th>${t('thPerson')}</th><th>${t('thState')}</th><th class="num">${t('thScore')}</th><th></th></tr></thead><tbody>`;
+    for (const r of rows) {
+      const st = r.s ? (r.sc.pending ? `<span class="tag amber">${t('toGrade', { n: r.sc.pending })}</span>` : `<span class="tag ${r.sc.pct >= (exam.passMark ?? 80) ? 'ok' : 'bad'}">${r.sc.pct >= (exam.passMark ?? 80) ? t('passed') : t('failed')}</span>`) : r.a ? `<span class="tag amber">${t('inProgress')}</span>` : `<span class="tag">${t('notStarted')}</span>`;
+      h += `<tr><td><b>${esc(r.name)}</b><br><span class="muted small">${esc(r.e)}${P[r.e] ? '' : ' · ' + t('notOnList')}</span></td><td>${st}</td><td class="num">${r.s ? `${r.sc.got} / ${r.sc.max}<br><span class="muted small">${r.sc.pct}%</span>` : ''}</td>
+        <td class="acts">${r.s ? `<button class="btn sm" data-rev="${esc(r.e)}">${t('review')}</button>` : ''}${r.s || r.a ? `<button class="btn sm danger" data-reset="${esc(r.e)}">${t('reset')}</button>` : ''}</td></tr>`;
+    }
+    h += '</tbody></table></div>';
+    // per-question stats
+    if (subs.length && (exam.questions || []).length) {
+      h += `<h2 class="sec">${t('perQ')}</h2><ol class="qstats">`;
+      for (const q of exam.questions) {
+        const vals = subs.map(r => r.sc.per[q.id]).filter(p => p && p.state !== 'pending');
+        const pc = vals.length ? Math.round(vals.reduce((a, p) => a + p.got / p.max, 0) / vals.length * 100) : null;
+        h += `<li><span class="qs-t">${esc(q.text.length > 140 ? q.text.slice(0, 140) + '…' : q.text)}</span><span class="bar"><i style="width:${pc ?? 0}%" class="${pc == null ? '' : pc < 50 ? 'lo' : pc < 80 ? 'mid' : 'hi'}"></i></span><span class="qs-n">${pc == null ? '–' : t('qCorrect', { n: pc })}</span></li>`;
+      }
+      h += '</ol>';
+    }
+    app().innerHTML = h;
+    app().querySelectorAll('[data-st]').forEach(b => b.onclick = async () => { try { await col('exams').doc(id).update({ status: b.dataset.st, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }); viewResults(id); } catch (e) { toast(t('saveFail', { e: e.message })); } });
+    $('#relBtn').onclick = async () => { if (!exam.released && pend && !confirm(t('relPend', { n: pend }))) return; try { await col('exams').doc(id).update({ released: !exam.released }); viewResults(id); } catch (e) { toast(t('saveFail', { e: e.message })); } };
+    $('#csvBtn').onclick = () => {
+      const q = s => '"' + String(s ?? '').replace(/"/g, '""') + '"';
+      const head = ['Name', 'Email', 'State', 'Points', 'Max', 'Percent', 'Pending', 'Submitted', ...exam.questions.map((x, i) => 'Q' + (i + 1))];
+      const lines = [head.map(q).join(',')];
+      for (const r of rows) lines.push([r.name, r.e, r.s ? (r.sc.pending ? 'to grade' : r.sc.pct >= (exam.passMark ?? 80) ? 'passed' : 'not passed') : r.a ? 'in progress' : 'not started', r.s ? r.sc.got : '', r.s ? r.sc.max : '', r.s ? r.sc.pct : '', r.s ? r.sc.pending : '', r.s ? fmtDate(r.s.submittedAt) : '', ...exam.questions.map(x => r.s ? (r.sc.per[x.id].state === 'pending' ? '?' : r.sc.per[x.id].got) : '')].map(q).join(','));
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv' })); a.download = (exam.title || 'exam').replace(/[^\w\-]+/g, '_') + '_results.csv'; a.click();
+    };
+    app().onclick = async e => {
+      const rv = e.target.closest('[data-rev]'), rs = e.target.closest('[data-reset]');
+      if (rs) {
+        const em = rs.dataset.reset, r = rows.find(x => x.e === em);
+        if (!confirm(t('resetQ', { name: r.name }))) return;
+        try { const b = db.batch(); for (const c of ['submissions', 'attempts', 'grades']) b.delete(col(c).doc(sid(id, em))); await b.commit(); toast(t('resetDone')); viewResults(id); } catch (err) { toast(t('saveFail', { e: err.message })); }
+      }
+      if (rv) {
+        const em = rv.dataset.rev, r = rows.find(x => x.e === em), g = G[em] || { text: {} };
+        modal(`<div class="mhead"><h2>${esc(r.name)}</h2>${stampHtml(exam, r.sc)}</div>${reviewHtml(exam, key, r.s, g, r.sc, true)}
+          <label class="full">${t('overall')}<textarea id="gOverall" rows="2">${esc(g.comment || '')}</textarea></label><div class="acts end sticky"><button class="btn" data-close>${t('close')}</button><button class="btn primary" id="gSave">${t('saveGrade')}</button></div>`, true);
+        $('#gSave').onclick = async () => {
+          const text = {};
+          document.querySelectorAll('#modal [data-gp]').forEach(i => { const qid = i.dataset.gp, c = document.querySelector(`#modal [data-gc="${qid}"]`); text[qid] = { pts: i.value === '' ? null : +i.value, comment: c ? c.value.trim() : '' }; });
+          try { await col('grades').doc(sid(id, em)).set({ examId: id, email: em, text, comment: $('#gOverall').value.trim(), by: me.email, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }); toast(t('gradeSaved')); closeModal(); viewResults(id); }
+          catch (err) { toast(t('saveFail', { e: err.message })); }
+        };
+      }
+    };
+  } catch (e) { fail(e); }
+}
+
+// ---------- admin: people ----------
+async function viewPeople() {
+  loading();
+  try {
+    const us = await col('examUsers').get();
+    const list = []; us.forEach(d => list.push({ email: d.id, ...d.data() }));
+    list.sort((a, b) => (a.role === 'admin' ? 0 : 1) - (b.role === 'admin' ? 0 : 1) || (a.name || a.email).localeCompare(b.name || b.email));
+    let h = `<div class="pagehead"><h1>${t('navPeople')}</h1></div><p class="muted">${t('peopleNote')}</p>
+      <section class="card form addp"><h2>${t('addPerson')}</h2><label>${t('name')}<input id="pName"></label><label>${t('email')}<input id="pEmail" type="email"></label>
+      <label>${t('role')}<select id="pRole"><option value="agent">${t('r_agent')}</option><option value="admin">${t('r_admin')}</option></select></label><button class="btn primary" id="pAdd">${t('addPerson')}</button>
+      <details class="full"><summary>${t('bulk')}</summary><textarea id="pBulk" rows="5" placeholder="Maria Ivanova, mivanova@betty.ca"></textarea><button class="btn" id="pBulkDo">${t('bulkDo')}</button></details></section>
+      <div class="tblwrap"><table class="tbl"><thead><tr><th>${t('name')}</th><th>${t('email')}</th><th>${t('role')}</th><th></th></tr></thead><tbody>`;
+    for (const p of list) {
+      const own = p.email === OWNER;
+      h += `<tr><td><b>${esc(p.name || '')}</b>${p.email === me.email ? ` <span class="muted small">(${t('you')})</span>` : ''}</td><td>${esc(p.email)}</td>
+        <td>${own ? t('owner') : `<select data-role="${esc(p.email)}"><option value="agent" ${p.role !== 'admin' ? 'selected' : ''}>${t('r_agent')}</option><option value="admin" ${p.role === 'admin' ? 'selected' : ''}>${t('r_admin')}</option></select>`}</td>
+        <td class="acts">${own ? '' : `<button class="btn sm danger" data-rm="${esc(p.email)}">${t('remove')}</button>`}</td></tr>`;
+    }
+    h += '</tbody></table></div>';
+    app().innerHTML = h;
+    const valid = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+    const addMany = async items => {
+      for (const it of items) if (!valid(it.email)) { toast(t('badEmail', { e: it.email })); return; }
+      try { const b = db.batch(); items.forEach(it => b.set(col('examUsers').doc(it.email), { name: it.name, role: it.role, addedBy: me.email }, { merge: true })); await b.commit(); toast(t('added', { n: items.length })); viewPeople(); }
+      catch (e) { toast(t('saveFail', { e: e.message })); }
+    };
+    $('#pAdd').onclick = () => { const email = $('#pEmail').value.trim().toLowerCase(); if (!email) return; addMany([{ name: $('#pName').value.trim(), email, role: $('#pRole').value }]); };
+    $('#pBulkDo').onclick = () => {
+      const items = $('#pBulk').value.split('\n').map(l => l.trim()).filter(Boolean).map(l => { const m = l.match(/^(.*?)[,;\t]\s*(\S+@\S+)$/) || [null, '', l]; return { name: m[1].trim(), email: m[2].trim().toLowerCase(), role: 'agent' }; });
+      if (items.length) addMany(items);
+    };
+    app().onchange = async e => { const s = e.target.closest('[data-role]'); if (!s) return; try { await col('examUsers').doc(s.dataset.role).update({ role: s.value }); toast(t('saved')); } catch (err) { toast(t('saveFail', { e: err.message })); } };
+    app().onclick = async e => {
+      const b = e.target.closest('[data-rm]'); if (!b) return; const p = list.find(x => x.email === b.dataset.rm);
+      if (!confirm(t('removeQ', { name: p.name || p.email }))) return;
+      try { await col('examUsers').doc(p.email).delete(); viewPeople(); } catch (err) { toast(t('saveFail', { e: err.message })); }
+    };
+  } catch (e) { fail(e); }
+}
+
+// ---------- modal ----------
+let modalReturn = null;
+function modal(html, wide) {
+  modalReturn = document.activeElement;
+  const bg = $('#modalbg'); $('#modal').innerHTML = html; $('#modal').classList.toggle('wide', !!wide); bg.hidden = false;
+  const f = $('#modal').querySelector('textarea,input,button'); f && f.focus();
+}
+function closeModal() { $('#modalbg').hidden = true; $('#modal').innerHTML = ''; modalReturn && modalReturn.focus && modalReturn.focus(); }
+document.addEventListener('click', e => { if (e.target.closest('[data-close]') || e.target.id === 'modalbg') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#modalbg').hidden) closeModal(); });
+
+// ---------- shell: language, nav, auth ----------
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
+  document.title = t('app');
+  $('#langBtn').textContent = DICT[LANG]._short;
+}
+$('#langBtn').addEventListener('click', e => {
+  e.stopPropagation(); const old = $('.langmenu'); if (old) { old.remove(); return; }
+  const m = document.createElement('div'); m.className = 'langmenu'; m.setAttribute('role', 'menu');
+  m.innerHTML = Object.keys(DICT).map(k => `<button role="menuitemradio" aria-checked="${k === LANG}" data-l="${k}"><b>${DICT[k]._short}</b>${DICT[k]._name}</button>`).join('');
+  e.currentTarget.parentElement.appendChild(m); m.querySelector('button').focus();
+  m.addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b) return; if (dirty && !confirm(t('unsaved'))) return; dirty = false; LANG = b.dataset.l; try { localStorage.setItem('exam:lang', LANG); } catch (er) {} m.remove(); applyLang(); route(); });
+});
+document.addEventListener('click', e => { const m = $('.langmenu'); if (m && !m.contains(e.target)) m.remove(); });
+applyLang();
+
+function gate(msg) { $('#gate').hidden = false; $('#shell').hidden = true; $('#gatemsg').textContent = msg || t('gateP'); }
+(function init() {
+  if (!window.FIREBASE_CONFIG || !window.FIREBASE_CONFIG.apiKey || /PASTE/.test(window.FIREBASE_CONFIG.apiKey)) { gate(t('noCfg')); return; }
+  firebase.initializeApp(window.FIREBASE_CONFIG);
+  auth = firebase.auth(); db = firebase.firestore();
+  $('#login').addEventListener('click', () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => gate(t('signInFail', { e: e.message }))));
+  $('#logout').addEventListener('click', () => { if (dirty && !confirm(t('unsaved'))) return; dirty = false; auth.signOut(); });
+  auth.onAuthStateChanged(async u => {
+    if (!u) { me = null; gate(); return; }
+    const email = (u.email || '').toLowerCase();
+    try {
+      const ref = col('examUsers').doc(email); let d = await ref.get();
+      if (!d.exists && email === OWNER) { await ref.set({ name: u.displayName || 'Denis', role: 'admin' }); d = await ref.get(); }
+      if (!d.exists) { gate(t('noAccess', { email })); $('#login').hidden = true; $('#gateOut').hidden = false; return; }
+      const data = d.data();
+      me = { email, name: data.name || u.displayName || email, role: email === OWNER ? 'admin' : data.role === 'admin' ? 'admin' : 'agent' };
+    } catch (e) { gate(t('noAccess', { email })); $('#login').hidden = true; $('#gateOut').hidden = false; return; }
+    $('#gate').hidden = true; $('#shell').hidden = false; $('#who').textContent = me.name;
+    document.querySelectorAll('.adminonly').forEach(x => { x.hidden = !isAdmin(); });
+    route();
+  });
+  $('#gateOut').addEventListener('click', () => auth.signOut().then(() => { $('#login').hidden = false; $('#gateOut').hidden = true; gate(); }));
+})();
+
+</script>
+</body>
+</html>
