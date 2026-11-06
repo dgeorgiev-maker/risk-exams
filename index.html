@@ -126,6 +126,9 @@ main{max-width:1080px;margin:0 auto;padding:28px 20px 120px}
 .qs-n{font-size:13px;color:var(--muted);text-align:right}
 .addp details{margin-top:4px}.addp summary{cursor:pointer;color:var(--navy);font-size:14px}.addp details textarea{margin:10px 0}
 .addp>button{align-self:end}
+.who fieldset{border:0;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:8px 22px}.who legend{font-size:13.5px;color:var(--muted);font-weight:500;margin-bottom:8px;padding:0}
+.who .wholist{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:6px 22px;width:100%;max-height:300px;overflow:auto}.who #whoFilter{width:100%;max-width:320px;margin-bottom:6px}
+.who p.note{margin:0}
 
 /* modal & toast */
 .modalbg{position:fixed;inset:0;z-index:40;background:rgba(10,15,22,.5);display:grid;place-items:center;padding:16px}
@@ -168,6 +171,9 @@ main{max-width:1080px;margin:0 auto;padding:28px 20px 120px}
 // ---------- config ----------
 const OWNER = 'dgeorgiev@betty.ca'; // always an admin; must match the email in firestore.rules
 const MAX_TEXT = 4000;
+// Agent positions. An exam is shown to everyone with a ticked position, plus anyone assigned by name.
+// 'newhire' gets no exams by default: assign one to them by name (People → Add person, or in the exam editor).
+const POSITIONS = ['associate', 'analyst', 'senior', 'newhire'];
 
 // ---------- languages ----------
 const DICT = {
@@ -210,7 +216,10 @@ en: {
   // people
   addPerson: 'Add person', name: 'Name', email: 'Work email', role: 'Role', r_agent: 'Agent', r_admin: 'Admin', bulk: 'Add many: one per line, “Name, email”', bulkDo: 'Add all',
   added: 'Added {n}.', badEmail: '“{e}” isn’t an email address.', removeQ: 'Remove {name} from the exam list?', owner: 'Owner', you: 'you',
-  peopleNote: 'Agents can take exams and see their own results. Admins can also create exams, grade and manage people.'
+  peopleNote: 'Agents only see exams given to their position or to them by name. Admins can also create exams, grade and manage people.',
+  position: 'Position', pos_: 'No position', pos_associate: 'Risk and Fraud Associate', pos_analyst: 'Risk and Fraud Analyst', pos_senior: 'Senior Risk and Fraud Analyst', pos_newhire: 'New hire',
+  whoTakes: 'Who takes this exam', byPos: 'Everyone with these positions', byName: 'Also these people, by name', noOne: 'Nobody is assigned yet, so no agent can see this exam.',
+  nPeople: '{n} people', whoNone: 'Not assigned', giveExam: 'Give them an exam (optional)', noExam: '— none —', assigned: 'Assigned', filterPh: 'Find a person…'
 },
 bg: {
   _name: 'Български', _short: 'BG',
@@ -247,7 +256,10 @@ bg: {
   exportCsv: 'Свали CSV', notOnList: 'не е в списъка',
   addPerson: 'Добави човек', name: 'Име', email: 'Служебен имейл', role: 'Роля', r_agent: 'Агент', r_admin: 'Админ', bulk: 'Добави много: по един на ред, „Име, имейл“', bulkDo: 'Добави всички',
   added: 'Добавени {n}.', badEmail: '„{e}“ не е имейл адрес.', removeQ: 'Да махна ли {name} от списъка за изпити?', owner: 'Собственик', you: 'ти',
-  peopleNote: 'Агентите решават изпити и виждат своите резултати. Админите също създават изпити, оценяват и управляват хората.'
+  peopleNote: 'Агентите виждат само изпитите, дадени на тяхната позиция или лично на тях. Админите също създават изпити, оценяват и управляват хората.',
+  position: 'Позиция', pos_: 'Без позиция', pos_associate: 'Risk and Fraud Associate', pos_analyst: 'Risk and Fraud Analyst', pos_senior: 'Senior Risk and Fraud Analyst', pos_newhire: 'Нов служител',
+  whoTakes: 'Кой решава този изпит', byPos: 'Всички с тези позиции', byName: 'И тези хора, поименно', noOne: 'Още никой не е назначен, така че никой агент не вижда този изпит.',
+  nPeople: '{n} души', whoNone: 'Не е назначен', giveExam: 'Дай му изпит (по желание)', noExam: '— няма —', assigned: 'Назначен', filterPh: 'Търси човек…'
 },
 el: {
   _name: 'Ελληνικά', _short: 'ΕΛ',
@@ -284,7 +296,10 @@ el: {
   exportCsv: 'Λήψη CSV', notOnList: 'εκτός λίστας',
   addPerson: 'Προσθήκη ατόμου', name: 'Όνομα', email: 'Εταιρικό email', role: 'Ρόλος', r_agent: 'Υπάλληλος', r_admin: 'Διαχειριστής', bulk: 'Πολλά μαζί: ένα ανά γραμμή, «Όνομα, email»', bulkDo: 'Προσθήκη όλων',
   added: 'Προστέθηκαν {n}.', badEmail: 'Το «{e}» δεν είναι διεύθυνση email.', removeQ: 'Αφαίρεση του/της {name} από τη λίστα εξετάσεων;', owner: 'Κάτοχος', you: 'εσείς',
-  peopleNote: 'Οι υπάλληλοι δίνουν εξετάσεις και βλέπουν τα δικά τους αποτελέσματα. Οι διαχειριστές επίσης δημιουργούν εξετάσεις, βαθμολογούν και διαχειρίζονται άτομα.'
+  peopleNote: 'Οι υπάλληλοι βλέπουν μόνο τις εξετάσεις που δόθηκαν στη θέση τους ή ονομαστικά σε αυτούς. Οι διαχειριστές επίσης δημιουργούν εξετάσεις, βαθμολογούν και διαχειρίζονται άτομα.',
+  position: 'Θέση', pos_: 'Χωρίς θέση', pos_associate: 'Risk and Fraud Associate', pos_analyst: 'Risk and Fraud Analyst', pos_senior: 'Senior Risk and Fraud Analyst', pos_newhire: 'Νέος υπάλληλος',
+  whoTakes: 'Ποιοι δίνουν αυτή την εξέταση', byPos: 'Όλοι με αυτές τις θέσεις', byName: 'Και αυτά τα άτομα, ονομαστικά', noOne: 'Δεν έχει οριστεί κανείς ακόμα, οπότε κανένας υπάλληλος δεν τη βλέπει.',
+  nPeople: '{n} άτομα', whoNone: 'Δεν έχει οριστεί', giveExam: 'Δώστε του μια εξέταση (προαιρετικά)', noExam: '— καμία —', assigned: 'Ορίστηκε', filterPh: 'Αναζήτηση ατόμου…'
 }
 };
 let LANG = (() => { try { const s = localStorage.getItem('exam:lang'); if (DICT[s]) return s; } catch (e) {} const n = (navigator.language || '').slice(0, 2); return n === 'bg' ? 'bg' : n === 'el' ? 'el' : 'en'; })();
@@ -330,21 +345,30 @@ function scoreOf(exam, key, sub, grade) {
 }
 
 // ---------- state ----------
-let auth, db, me = null; // me = { email, name, role }
+let auth, db, me = null; // me = { email, name, role, position }
 const isAdmin = () => me && me.role === 'admin';
 let dirty = false; // editor has unsaved changes
 
 // ---------- data access ----------
 const col = c => db.collection(c);
+// Who can see an exam. `visibleTo` is what the security rules check: 'pos:<position>' and 'u:<email>' keys.
+// Drafts are visible to nobody but admins. Recompute it whenever status, positions or assignees change.
+const audienceOf = x => x.status === 'draft' ? [] : [...(x.positions || []).map(p => 'pos:' + p), ...(x.assignees || []).map(e => 'u:' + e)];
+const canTake = (x, p) => (x.assignees || []).includes(p.email) || (!!p.position && (x.positions || []).includes(p.position));
+const posName = p => t('pos_' + (POSITIONS.includes(p) ? p : ''));
 async function listMyExams() {
-  const [ex, subs, atts] = await Promise.all([
-    col('exams').where('status', 'in', ['open', 'closed']).get(),
+  const queries = [col('exams').where('visibleTo', 'array-contains', 'u:' + me.email).get()];
+  if (me.position) queries.push(col('exams').where('visibleTo', 'array-contains', 'pos:' + me.position).get());
+  const [subs, atts, ...exs] = await Promise.all([
     col('submissions').where('email', '==', me.email).get(),
-    col('attempts').where('email', '==', me.email).get()
+    col('attempts').where('email', '==', me.email).get(),
+    ...queries
   ]);
   const S = {}, A = {};
   subs.forEach(d => { S[d.data().examId] = d.data(); }); atts.forEach(d => { A[d.data().examId] = d.data(); });
-  const list = []; ex.forEach(d => list.push({ id: d.id, ...d.data() }));
+  const seen = {};
+  exs.forEach(ex => ex.forEach(d => { const x = d.data(); if (x.status === 'open' || x.status === 'closed') seen[d.id] = { id: d.id, ...x }; }));
+  const list = Object.values(seen);
   list.sort((a, b) => (toDate(b.updatedAt) || 0) - (toDate(a.updatedAt) || 0));
   return { list, S, A };
 }
@@ -544,7 +568,8 @@ async function viewManage() {
     if (!list.length) h += `<section class="empty soft"><p>${t('emptyManage')}</p></section>`;
     else {
       h += `<div class="tblwrap"><table class="tbl"><thead><tr><th>${t('thTitle')}</th><th>${t('thStatus')}</th><th class="num">${t('thQ')}</th><th class="num">${t('thSub')}</th><th></th></tr></thead><tbody>`;
-      for (const x of list) h += `<tr><td><a href="#results-${x.id}"><b>${esc(x.title || t('untitled'))}</b></a></td><td><span class="tag st-${x.status}">${t('st_' + x.status)}</span>${x.released ? ` <span class="tag ok">${t('released')}</span>` : ''}</td><td class="num">${(x.questions || []).length}</td><td class="num">${cnt[x.id] || 0}</td>
+      const who = x => { const parts = (x.positions || []).map(posName); if ((x.assignees || []).length) parts.push(t('nPeople', { n: x.assignees.length })); return parts.length ? parts.join(' · ') : t('whoNone'); };
+      for (const x of list) h += `<tr><td><a href="#results-${x.id}"><b>${esc(x.title || t('untitled'))}</b></a><br><span class="muted small">${esc(who(x))}</span></td><td><span class="tag st-${x.status}">${t('st_' + x.status)}</span>${x.released ? ` <span class="tag ok">${t('released')}</span>` : ''}</td><td class="num">${(x.questions || []).length}</td><td class="num">${cnt[x.id] || 0}</td>
         <td class="acts"><a class="btn sm" href="#edit-${x.id}">${t('edit')}</a><a class="btn sm" href="#results-${x.id}">${t('results')}</a><button class="btn sm" data-dup="${x.id}">${t('duplicate')}</button><button class="btn sm danger" data-del="${x.id}">${t('del')}</button></td></tr>`;
       h += '</tbody></table></div>';
     }
@@ -552,7 +577,7 @@ async function viewManage() {
     $('#newExam').onclick = async () => {
       const ref = col('exams').doc(); const now = firebase.firestore.FieldValue.serverTimestamp();
       const b = db.batch();
-      b.set(ref, { title: '', desc: '', status: 'draft', released: false, timeLimit: 0, passMark: 80, partial: false, questions: [], createdAt: now, updatedAt: now, createdBy: me.email });
+      b.set(ref, { title: '', desc: '', status: 'draft', released: false, timeLimit: 0, passMark: 80, partial: false, questions: [], positions: [], assignees: [], visibleTo: [], createdAt: now, updatedAt: now, createdBy: me.email });
       b.set(col('examKeys').doc(ref.id), { q: {} });
       try { await b.commit(); go('edit-' + ref.id); } catch (e) { toast(t('saveFail', { e: e.message })); }
     };
@@ -563,7 +588,7 @@ async function viewManage() {
         const ref = col('exams').doc(), now = firebase.firestore.FieldValue.serverTimestamp(), b = db.batch();
         const title = (x.title || t('untitled')).replace(/\s*\(\d+\)$/, '') + ' (' + (list.filter(y => (y.title || '').startsWith((x.title || '').replace(/\s*\(\d+\)$/, ''))).length + 1) + ')';
         const { id: _old, ...rest } = x;
-        b.set(ref, { ...rest, title, status: 'draft', released: false, createdAt: now, updatedAt: now, createdBy: me.email });
+        b.set(ref, { ...rest, title, status: 'draft', released: false, visibleTo: [], createdAt: now, updatedAt: now, createdBy: me.email });
         b.set(col('examKeys').doc(ref.id), kd.exists ? kd.data() : { q: {} });
         try { await b.commit(); toast(t('dupDone')); go('edit-' + ref.id); } catch (err) { toast(t('saveFail', { e: err.message })); }
       }
@@ -585,12 +610,16 @@ async function viewManage() {
 async function viewEdit(id) {
   loading();
   try {
-    const [ed, kd, sc] = await Promise.all([col('exams').doc(id).get(), col('examKeys').doc(id).get(), col('submissions').where('examId', '==', id).get()]);
+    const [ed, kd, sc, us] = await Promise.all([col('exams').doc(id).get(), col('examKeys').doc(id).get(), col('submissions').where('examId', '==', id).get(), col('examUsers').get()]);
     if (!ed.exists) throw new Error('Not found');
     const exam = ed.data(), key = kd.exists ? kd.data() : { q: {} };
+    const agents = []; us.forEach(d => { if (d.data().role !== 'admin') agents.push({ email: d.id, ...d.data() }); });
+    for (const e of exam.assignees || []) if (!agents.some(a => a.email === e)) agents.push({ email: e, name: '' });
+    agents.sort((a, b) => (a.name || a.email).localeCompare(b.name || b.email));
     // working copy: questions with their key merged in
     const W = {
       title: exam.title || '', desc: exam.desc || '', status: exam.status || 'draft', timeLimit: +exam.timeLimit || 0, passMark: exam.passMark ?? 80, partial: !!exam.partial,
+      positions: [...(exam.positions || [])], assignees: [...(exam.assignees || [])],
       qs: (exam.questions || []).map(q => ({ ...q, options: [...(q.options || [])], correct: [...((key.q[q.id] || {}).correct || [])], model: (key.q[q.id] || {}).model || '', explain: (key.q[q.id] || {}).explain || '' }))
     };
     const nSubs = sc.size;
@@ -605,7 +634,12 @@ async function viewEdit(id) {
         <label>${t('status')}<select data-w="status">${['draft', 'open', 'closed'].map(s => `<option value="${s}" ${W.status === s ? 'selected' : ''}>${t('st_' + s)}</option>`).join('')}</select></label>
         <label>${t('timeLimit')}<input type="number" min="0" max="600" data-w="timeLimit" value="${W.timeLimit}"></label>
         <label>${t('passMark')}<input type="number" min="0" max="100" data-w="passMark" value="${W.passMark}"></label>
-        <label class="check"><input type="checkbox" data-w="partial" ${W.partial ? 'checked' : ''}>${t('partial')}</label></section><ol class="qlist edit">`;
+        <label class="check"><input type="checkbox" data-w="partial" ${W.partial ? 'checked' : ''}>${t('partial')}</label></section>
+        <section class="card form who"><h2>${t('whoTakes')}</h2>
+        <fieldset class="full"><legend>${t('byPos')}</legend>${POSITIONS.map(p => `<label class="check"><input type="checkbox" data-pos="${p}" ${W.positions.includes(p) ? 'checked' : ''}>${esc(posName(p))}</label>`).join('')}</fieldset>
+        <fieldset class="full"><legend>${t('byName')}</legend>${agents.length > 8 ? `<input id="whoFilter" type="search" placeholder="${esc(t('filterPh'))}">` : ''}
+        <div class="wholist">${agents.map(a => `<label class="check" data-who-row="${esc((a.name + ' ' + a.email).toLowerCase())}"><input type="checkbox" data-who="${esc(a.email)}" ${W.assignees.includes(a.email) ? 'checked' : ''}><span><b>${esc(a.name || a.email)}</b> <span class="muted small">${esc(a.position ? posName(a.position) : a.name ? '' : t('notOnList'))}</span></span></label>`).join('')}</div></fieldset>
+        <p class="note full" id="noOne" ${W.positions.length || W.assignees.length ? 'hidden' : ''}>${t('noOne')}</p></section><ol class="qlist edit">`;
       W.qs.forEach((q, i) => {
         h += `<li class="q card" data-i="${i}"><div class="qhead"><span class="qn">${i + 1}</span>
           <select data-f="type" aria-label="${t('qType')}">${['single', 'multi', 'text'].map(x => `<option value="${x}" ${q.type === x ? 'selected' : ''}>${t(x === 'single' ? 'addSingle' : x === 'multi' ? 'addMulti' : 'addText')}</option>`).join('')}</select>
@@ -671,13 +705,21 @@ async function viewEdit(id) {
         keyOut[q.id] = { correct: q.type === 'text' ? [] : correct, model: q.type === 'text' ? q.model : '', explain: q.explain };
       }
       const b = db.batch();
-      b.update(col('exams').doc(id), { title: W.title.trim(), desc: W.desc.trim(), status: W.status, timeLimit: Math.max(0, Math.round(+W.timeLimit || 0)), passMark: Math.max(0, Math.min(100, +W.passMark || 0)), partial: W.partial, questions: qsOut, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      const positions = POSITIONS.filter(p => W.positions.includes(p)), assignees = [...new Set(W.assignees)];
+      b.update(col('exams').doc(id), { title: W.title.trim(), desc: W.desc.trim(), status: W.status, timeLimit: Math.max(0, Math.round(+W.timeLimit || 0)), passMark: Math.max(0, Math.min(100, +W.passMark || 0)), partial: W.partial, questions: qsOut,
+        positions, assignees, visibleTo: audienceOf({ status: W.status, positions, assignees }), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
       b.set(col('examKeys').doc(id), { q: keyOut });
       try { await b.commit(); dirty = false; toast(t('saved')); W.qs.forEach((q, i) => { q.options = qsOut[i].options; q.correct = keyOut[q.id].correct; }); draw(); } catch (e) { toast(t('saveFail', { e: e.message || e.code })); }
     }
     app().oninput = e => {
       const el = e.target;
       if (el.dataset.w) { const k = el.dataset.w; W[k] = el.type === 'checkbox' ? el.checked : el.value; if (k === 'title') document.querySelector('.pagehead h1').textContent = el.value || t('untitled'); dirty = true; return; }
+      if (el.id === 'whoFilter') { const f = el.value.trim().toLowerCase(); app().querySelectorAll('[data-who-row]').forEach(r => { r.hidden = !!f && !r.dataset.whoRow.includes(f); }); return; }
+      if (el.dataset.pos || el.dataset.who) {
+        const arr = el.dataset.pos ? W.positions : W.assignees, v = el.dataset.pos || el.dataset.who, i = arr.indexOf(v);
+        if (el.checked && i < 0) arr.push(v); else if (!el.checked && i >= 0) arr.splice(i, 1);
+        $('#noOne').hidden = !!(W.positions.length || W.assignees.length); dirty = true; return;
+      }
       const li = el.closest('.q'); if (!li) return; const q = W.qs[+li.dataset.i];
       if (el.dataset.f === 'type') { q.type = el.value; if (q.type === 'text') { q.options = []; q.correct = []; } else { if (q.options.length < 2) q.options = ['', '']; if (q.type === 'single') q.correct = q.correct.slice(0, 1); } dirty = true; draw(); return; }
       if (el.dataset.f) q[el.dataset.f] = el.dataset.f === 'points' ? el.value : el.value;
@@ -712,7 +754,8 @@ async function viewResults(id) {
     const S = {}, A = {}, G = {}, P = {};
     ss.forEach(d => { S[d.data().email] = d.data(); }); as.forEach(d => { A[d.data().email] = d.data(); }); gs.forEach(d => { G[d.data().email] = d.data(); });
     us.forEach(d => { P[d.id] = d.data(); });
-    const emails = [...new Set([...Object.keys(P).filter(e => P[e].role !== 'admin' || S[e] || A[e]), ...Object.keys(S), ...Object.keys(A)])];
+    // everyone this exam is given to, plus anyone who already started or submitted it
+    const emails = [...new Set([...Object.keys(P).filter(e => (P[e].role !== 'admin' && canTake(exam, { email: e, position: P[e].position })) || S[e] || A[e]), ...(exam.assignees || []), ...Object.keys(S), ...Object.keys(A)])];
     const rows = emails.map(e => { const s = S[e]; const sc = s ? scoreOf(exam, key, s, G[e]) : null; return { e, name: (P[e] && P[e].name) || (s && s.name) || e, s, a: A[e], sc }; })
       .sort((x, y) => (y.s ? 1 : 0) - (x.s ? 1 : 0) || x.name.localeCompare(y.name));
     const subs = rows.filter(r => r.s), pend = subs.filter(r => r.sc.pending).length;
@@ -741,7 +784,7 @@ async function viewResults(id) {
       h += '</ol>';
     }
     app().innerHTML = h;
-    app().querySelectorAll('[data-st]').forEach(b => b.onclick = async () => { try { await col('exams').doc(id).update({ status: b.dataset.st, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }); viewResults(id); } catch (e) { toast(t('saveFail', { e: e.message })); } });
+    app().querySelectorAll('[data-st]').forEach(b => b.onclick = async () => { try { await col('exams').doc(id).update({ status: b.dataset.st, visibleTo: audienceOf({ ...exam, status: b.dataset.st }), updatedAt: firebase.firestore.FieldValue.serverTimestamp() }); viewResults(id); } catch (e) { toast(t('saveFail', { e: e.message })); } });
     $('#relBtn').onclick = async () => { if (!exam.released && pend && !confirm(t('relPend', { n: pend }))) return; try { await col('exams').doc(id).update({ released: !exam.released }); viewResults(id); } catch (e) { toast(t('saveFail', { e: e.message })); } };
     $('#csvBtn').onclick = () => {
       const q = s => '"' + String(s ?? '').replace(/"/g, '""') + '"';
@@ -776,34 +819,52 @@ async function viewResults(id) {
 async function viewPeople() {
   loading();
   try {
-    const us = await col('examUsers').get();
+    const [us, ex] = await Promise.all([col('examUsers').get(), col('exams').get()]);
     const list = []; us.forEach(d => list.push({ email: d.id, ...d.data() }));
+    const exams = []; ex.forEach(d => exams.push({ id: d.id, ...d.data() }));
+    exams.sort((a, b) => (toDate(b.updatedAt) || 0) - (toDate(a.updatedAt) || 0));
     list.sort((a, b) => (a.role === 'admin' ? 0 : 1) - (b.role === 'admin' ? 0 : 1) || (a.name || a.email).localeCompare(b.name || b.email));
+    const posOpts = cur => `<option value="" ${cur ? '' : 'selected'}>${t('pos_')}</option>` + POSITIONS.map(p => `<option value="${p}" ${cur === p ? 'selected' : ''}>${esc(posName(p))}</option>`).join('');
+    const myExams = p => exams.filter(x => canTake(x, p)).map(x => x.title || t('untitled'));
     let h = `<div class="pagehead"><h1>${t('navPeople')}</h1></div><p class="muted">${t('peopleNote')}</p>
       <section class="card form addp"><h2>${t('addPerson')}</h2><label>${t('name')}<input id="pName"></label><label>${t('email')}<input id="pEmail" type="email"></label>
-      <label>${t('role')}<select id="pRole"><option value="agent">${t('r_agent')}</option><option value="admin">${t('r_admin')}</option></select></label><button class="btn primary" id="pAdd">${t('addPerson')}</button>
+      <label>${t('role')}<select id="pRole"><option value="agent">${t('r_agent')}</option><option value="admin">${t('r_admin')}</option></select></label>
+      <label>${t('position')}<select id="pPos">${posOpts('associate')}</select></label>
+      <label>${t('giveExam')}<select id="pExam"><option value="">${t('noExam')}</option>${exams.map(x => `<option value="${x.id}">${esc(x.title || t('untitled'))} (${t('st_' + x.status)})</option>`).join('')}</select></label>
+      <button class="btn primary" id="pAdd">${t('addPerson')}</button>
       <details class="full"><summary>${t('bulk')}</summary><textarea id="pBulk" rows="5" placeholder="Maria Ivanova, mivanova@betty.ca"></textarea><button class="btn" id="pBulkDo">${t('bulkDo')}</button></details></section>
-      <div class="tblwrap"><table class="tbl"><thead><tr><th>${t('name')}</th><th>${t('email')}</th><th>${t('role')}</th><th></th></tr></thead><tbody>`;
+      <div class="tblwrap"><table class="tbl"><thead><tr><th>${t('name')}</th><th>${t('email')}</th><th>${t('role')}</th><th>${t('position')}</th><th></th></tr></thead><tbody>`;
     for (const p of list) {
-      const own = p.email === OWNER;
-      h += `<tr><td><b>${esc(p.name || '')}</b>${p.email === me.email ? ` <span class="muted small">(${t('you')})</span>` : ''}</td><td>${esc(p.email)}</td>
+      const own = p.email === OWNER, adm = own || p.role === 'admin', mine = adm ? [] : myExams(p);
+      h += `<tr><td><b>${esc(p.name || '')}</b>${p.email === me.email ? ` <span class="muted small">(${t('you')})</span>` : ''}${mine.length ? `<br><span class="muted small">${esc(mine.join(' · '))}</span>` : ''}</td><td>${esc(p.email)}</td>
         <td>${own ? t('owner') : `<select data-role="${esc(p.email)}"><option value="agent" ${p.role !== 'admin' ? 'selected' : ''}>${t('r_agent')}</option><option value="admin" ${p.role === 'admin' ? 'selected' : ''}>${t('r_admin')}</option></select>`}</td>
+        <td>${adm ? '<span class="muted">–</span>' : `<select data-pos="${esc(p.email)}" aria-label="${esc(t('position'))}">${posOpts(p.position || '')}</select>`}</td>
         <td class="acts">${own ? '' : `<button class="btn sm danger" data-rm="${esc(p.email)}">${t('remove')}</button>`}</td></tr>`;
     }
     h += '</tbody></table></div>';
     app().innerHTML = h;
     const valid = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
-    const addMany = async items => {
+    const addMany = async (items, examId) => {
       for (const it of items) if (!valid(it.email)) { toast(t('badEmail', { e: it.email })); return; }
-      try { const b = db.batch(); items.forEach(it => b.set(col('examUsers').doc(it.email), { name: it.name, role: it.role, addedBy: me.email }, { merge: true })); await b.commit(); toast(t('added', { n: items.length })); viewPeople(); }
-      catch (e) { toast(t('saveFail', { e: e.message })); }
+      try {
+        const b = db.batch(); items.forEach(it => b.set(col('examUsers').doc(it.email), { name: it.name, role: it.role, position: it.role === 'admin' ? '' : it.position, addedBy: me.email }, { merge: true }));
+        const x = examId && exams.find(y => y.id === examId);
+        if (x) { const assignees = [...new Set([...(x.assignees || []), ...items.map(it => it.email)])]; b.update(col('exams').doc(x.id), { assignees, visibleTo: audienceOf({ ...x, assignees }) }); }
+        await b.commit(); toast(t('added', { n: items.length })); viewPeople();
+      } catch (e) { toast(t('saveFail', { e: e.message })); }
     };
-    $('#pAdd').onclick = () => { const email = $('#pEmail').value.trim().toLowerCase(); if (!email) return; addMany([{ name: $('#pName').value.trim(), email, role: $('#pRole').value }]); };
+    $('#pAdd').onclick = () => { const email = $('#pEmail').value.trim().toLowerCase(); if (!email) return; addMany([{ name: $('#pName').value.trim(), email, role: $('#pRole').value, position: $('#pPos').value }], $('#pExam').value); };
     $('#pBulkDo').onclick = () => {
-      const items = $('#pBulk').value.split('\n').map(l => l.trim()).filter(Boolean).map(l => { const m = l.match(/^(.*?)[,;\t]\s*(\S+@\S+)$/) || [null, '', l]; return { name: m[1].trim(), email: m[2].trim().toLowerCase(), role: 'agent' }; });
-      if (items.length) addMany(items);
+      const items = $('#pBulk').value.split('\n').map(l => l.trim()).filter(Boolean).map(l => { const m = l.match(/^(.*?)[,;\t]\s*(\S+@\S+)$/) || [null, '', l]; return { name: m[1].trim(), email: m[2].trim().toLowerCase(), role: 'agent', position: $('#pPos').value }; });
+      if (items.length) addMany(items, $('#pExam').value);
     };
-    app().onchange = async e => { const s = e.target.closest('[data-role]'); if (!s) return; try { await col('examUsers').doc(s.dataset.role).update({ role: s.value }); toast(t('saved')); } catch (err) { toast(t('saveFail', { e: err.message })); } };
+    app().onchange = async e => {
+      const s = e.target.closest('[data-role]'), ps = e.target.closest('select[data-pos]'); if (!s && !ps) return;
+      try {
+        if (s) { await col('examUsers').doc(s.dataset.role).update(s.value === 'admin' ? { role: 'admin' } : { role: s.value }); toast(t('saved')); viewPeople(); }
+        else { await col('examUsers').doc(ps.dataset.pos).update({ position: ps.value }); toast(t('saved')); }
+      } catch (err) { toast(t('saveFail', { e: err.message })); }
+    };
     app().onclick = async e => {
       const b = e.target.closest('[data-rm]'); if (!b) return; const p = list.find(x => x.email === b.dataset.rm);
       if (!confirm(t('removeQ', { name: p.name || p.email }))) return;
@@ -855,7 +916,7 @@ function gate(msg) { $('#gate').hidden = false; $('#shell').hidden = true; $('#g
       if (!d.exists && email === OWNER) { await ref.set({ name: u.displayName || 'Denis', role: 'admin' }); d = await ref.get(); }
       if (!d.exists) { gate(t('noAccess', { email })); $('#login').hidden = true; $('#gateOut').hidden = false; return; }
       const data = d.data();
-      me = { email, name: data.name || u.displayName || email, role: email === OWNER ? 'admin' : data.role === 'admin' ? 'admin' : 'agent' };
+      me = { email, name: data.name || u.displayName || email, role: email === OWNER ? 'admin' : data.role === 'admin' ? 'admin' : 'agent', position: POSITIONS.includes(data.position) ? data.position : '' };
     } catch (e) { gate(t('noAccess', { email })); $('#login').hidden = true; $('#gateOut').hidden = false; return; }
     $('#gate').hidden = true; $('#shell').hidden = false; $('#who').textContent = me.name;
     document.querySelectorAll('.adminonly').forEach(x => { x.hidden = !isAdmin(); });
